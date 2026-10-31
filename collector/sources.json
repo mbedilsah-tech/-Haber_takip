@@ -34,25 +34,12 @@
       "url": "https://www.aljazeera.com/xml/rss/all.xml"
     },
     {
-      "name": "Times of Israel",
-      "url": "https://www.timesofisrael.com/feed/"
-    },
-    {
       "name": "Middle East Eye",
       "url": "https://www.middleeasteye.net/rss"
     },
     {
       "name": "Defense News",
       "url": "https://www.defensenews.com/arc/outboundfeeds/rss/"
-    },
-    {
-      "name": "SavunmaSanayiST",
-      "url": "https://www.savunmasanayist.com/feed/"
-    },
-    {
-      "name": "Cumhurbaşkanlığı",
-      "url": "https://www.tccb.gov.tr/rss/haberler.xml",
-      "official": true
     }
   ],
   "gnews": [
@@ -83,6 +70,16 @@
     },
     {
       "q": "Yemen OR Sudan OR Sahel OR Lübnan when:1d"
+    },
+    {
+      "q": "site:savunmasanayist.com when:2d"
+    },
+    {
+      "q": "site:tccb.gov.tr when:2d",
+      "tag": "rte"
+    },
+    {
+      "q": "site:timesofisrael.com when:1d"
     }
   ],
   "telegram": [
@@ -107,7 +104,9 @@
     "Milli Savunma Bakanlığı",
     "Ukrayna Hava Kuvvetleri",
     "TCMB",
-    "SANA"
+    "SANA",
+    "Türkiye Cumhuriyeti Cumhurbaşkanlığı",
+    "tccb.gov.tr"
   ],
   "categories": {
     "war": [

@@ -463,7 +463,8 @@ def main() -> int:
                                      ensure_ascii=False), encoding="utf-8")
     clusters = cluster([annotate(dict(i)) for i in items])
 
-    write(out, "news.json", build_news(clusters))
+    news = build_news(clusters)
+    write(out, "news.json", news)
     write(out, "fronts.json", build_fronts(clusters))
     write(out, "rte.json", build_rte(clusters))
     if not a.no_markets:
@@ -475,6 +476,10 @@ def main() -> int:
                  "clusters": len(clusters), "seconds": round(time.time() - t0, 1)})
     write(out, "meta.json", META)
     print(json.dumps(META, ensure_ascii=False, indent=1))
+    # Kalite özeti: iş akışı kaydında sınıflamayı kontrol etmek için
+    print("KATEGORİLER", dict(Counter(s["cat"] for s in news["stories"])))
+    for s in news["stories"][:60]:
+        print(f'  [{s["cat"]}] n={s["n"]} {",".join(s["fronts"][:1]):<14} {s["title"][:100]}')
     return 0
 
 
