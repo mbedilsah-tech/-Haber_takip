@@ -102,7 +102,37 @@ tr:last-child td{border-bottom:none}
 .cal div:last-child{border-bottom:none}
 .cal .dt{font-family:var(--mono);font-size:12px;color:var(--accent);padding-top:2px}
 /* Alt sekme */
-nav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+/* Cephe detayı & olaylar */
+.front{cursor:pointer;text-align:left;width:100%}
+.front:hover{border-color:var(--muted)}
+.front .more{grid-column:1/-1;font-size:12px;color:var(--accent);font-weight:600}
+.ev{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:none}
+.ev .tm{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.35}
+.ev .ty{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.ev .pl{font-weight:600;font-size:14px}
+.ev p{margin:2px 0 6px;font-size:14px}
+.ev a{font-family:var(--mono);font-size:12px;color:var(--series);text-decoration:none}
+.media{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:150px;border-radius:8px;margin:6px 0;padding:10px;color:#fff;font-size:12px;text-decoration:none;
+  background:linear-gradient(160deg,rgba(15,24,36,.15),rgba(15,24,36,.85)),repeating-linear-gradient(135deg,#4a5a6e 0 14px,#55667b 14px 28px)}
+.media b{font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:4px;font-weight:500}
+.media span{background:rgba(0,0,0,.55);padding:3px 7px;border-radius:4px}
+.mini{flex-shrink:0;display:flex;align-items:flex-end;gap:4px;height:56px}
+.mini i{flex:1;background:var(--series);border-radius:3px 3px 0 0;min-height:3px}
+.minil{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+/* Erdoğan */
+.agenda{display:flex;flex-direction:column}
+.agenda>div{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.agenda>div:last-child{border-bottom:none}
+.agenda .h{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.agenda .w{font-size:12px;color:var(--muted)}
+.said{display:flex;flex-direction:column;gap:6px}
+.said .topic{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.said h4{margin:0;font-size:15.5px;line-height:1.35}
+.said blockquote{margin:2px 0;padding:6px 10px;border-left:3px solid var(--accent);background:var(--bg);font-size:14px;border-radius:0 6px 6px 0}
+.said a{font-family:var(--mono);font-size:12px;color:var(--series);text-decoration:none}
+.ttl{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+nav{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{background:none;border:none;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--muted);cursor:pointer}
 nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav button[aria-selected="true"]{color:var(--accent);font-weight:600}
@@ -144,6 +174,16 @@ nav button[aria-selected="true"]{color:var(--accent);font-weight:600}
           <div class="seg" id="range" role="group" aria-label="Zaman aralığı"></div></div>
         <div class="chartwrap" id="cwrap"><svg id="chart" role="img"></svg><div class="tip" id="tip"></div></div>
       </div>
+      <h2>İhracat</h2>
+      <div class="card chartcard">
+        <div class="charthead"><b>Aylık ihracat, milyar $ · 2026</b><span class="sub">Kaynak: Ticaret Bakanlığı / TİM · örnek</span></div>
+        <div class="kpis" style="grid-template-columns:1fr 1fr 1fr" id="expkpi"></div>
+        <div class="chartwrap"><svg id="mexp" style="width:100%;height:170px;display:block" role="img"></svg><div class="tip" id="tip2"></div></div>
+      </div>
+      <div class="card">
+        <div class="ttl"><b style="font-size:15px">Sektörler ve ülkeler</b><span class="sub">Ocak–Ekim, milyar $</span></div>
+        <table id="exptab" style="margin-top:6px"></table>
+      </div>
       <h2>Makro göstergeler</h2>
       <div class="card"><table id="macro"></table></div>
       <h2>Ekonomik takvim</h2>
@@ -167,12 +207,23 @@ nav button[aria-selected="true"]{color:var(--accent);font-weight:600}
         <svg id="expchart" style="width:100%;height:170px" role="img" aria-label="Yıllara göre savunma ihracatı çubuk grafiği"></svg>
       </div>
     </section>
+    <!-- ERDOĞAN -->
+    <section class="view" id="v-rte" aria-label="Cumhurbaşkanı">
+      <h2>Cumhurbaşkanı Erdoğan · 29 Ekim</h2>
+      <div class="card brief"><h3>Günün özeti</h3><ul id="rtebrief"></ul></div>
+      <h2>Program</h2><div class="sub" style="margin-top:-8px">Saatler yaklaşık; gerçek sürümde tccb.gov.tr programından çekilir.</div>
+      <div class="card agenda" id="agenda"></div>
+      <h2>Neler dedi</h2>
+      <div id="said" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div class="sub">Kaynaklar: İletişim Başkanlığı, tccb.gov.tr, @RTErdogan. Gerçek sürümde konuşmaların tam metni otomatik özetlenir.</div>
+    </section>
   </main>
   <nav role="tablist" id="nav">
     <button role="tab" aria-selected="true" data-v="feed"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>Akış</button>
     <button role="tab" aria-selected="false" data-v="data"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Veriler</button>
     <button role="tab" aria-selected="false" data-v="front"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg>Cepheler</button>
     <button role="tab" aria-selected="false" data-v="def"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.6-3.4 8.3-8 9-4.6-.7-8-4.4-8-9V6z"/></svg>Savunma</button>
+    <button role="tab" aria-selected="false" data-v="rte"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M19 21V10M9 21v-6h6v6M2 10l10-6 10 6"/></svg>Erdoğan</button>
   </nav>
 </div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><div class="in" id="sheetin"></div></div>
@@ -229,6 +280,8 @@ const KPIS=[
  {k:"usd",l:"USD/TRY",d:2,s:series(11,36.9,.00042,.006,N)},
  {k:"eur",l:"EUR/TRY",d:2,s:series(23,41.5,.00040,.008,N)},
  {k:"gold",l:"Gram altın (₺)",d:0,s:series(37,3400,.0011,.018,N)},
+ {k:"ons",l:"ONS/USD",d:0,s:series(79,2900,.0009,.016,N)},
+ {k:"silver",l:"Gümüş ONS/USD",d:2,s:series(83,32,.0007,.022,N)},
  {k:"bist",l:"BIST 100",d:0,s:series(41,9600,.0005,.022,N)},
  {k:"brent",l:"Brent ($)",d:2,s:series(53,74,-.0002,.024,N)},
  {k:"cds",l:"5Y CDS (baz puan)",d:0,s:series(67,300,-.0006,.03,N)}
@@ -302,7 +355,90 @@ const FRONTS=[
  ["Lübnan",23,30,"Güneyde sınırlı İsrail hava saldırıları."]
 ];
 const fmax=Math.max(...FRONTS.map(f=>f[1]));
-$("fronts").innerHTML=FRONTS.map(([n,c,p,l])=>{const d=c-p,pc=Math.round(d/p*100);return `<div class="card front"><span class="n">${n}</span><span class="c">${c} olay <span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span></span><div class="bar" role="img" aria-label="${c} olay"><i style="width:${(c/fmax*100).toFixed(1)}%"></i></div><span class="last">${l}</span></div>`;}).join("")+'<div class="sub">Örnek veri. Gerçek sürümde ACLED gibi açık çatışma veri tabanlarından beslenecek.</div>';
+/* Her cephe için son 7 günün günlük sayıları ve olay listesi (örnek). img: kaynakta görsel/video var mı */
+const DAILY={"Ukrayna–Rusya":[54,61,58,63,55,60,61],"Sudan":[24,22,19,21,20,18,22],"Gazze":[12,14,15,19,17,20,21],"Sahel (Mali, Burkina Faso)":[8,9,11,10,12,11,13],"Yemen":[7,8,9,6,9,10,9],"Suriye":[7,6,5,6,6,5,6],"Lübnan":[4,3,4,3,3,3,3]};
+const EVENTS={
+ "Ukrayna–Rusya":[
+  {tm:"31 Eki\n22:40",ty:"İHA saldırısı",pl:"Harkov",t:"Şehir merkezine Şahed tipi İHA'larla saldırı. Enerji altyapısında hasar bildirildi.",src:"Ukrayna Hava Kuvvetleri (Telegram)",url:"https://t.me/s/kpszsu",img:"video"},
+  {tm:"31 Eki\n17:15",ty:"Topçu",pl:"Zaporijya, Orihiv hattı",t:"Temas hattı boyunca yoğun topçu atışı. İki taraf da mevzi kaybı olmadığını açıkladı.",src:"War Mapper",url:"https://x.com/War_Mapper"},
+  {tm:"31 Eki\n09:05",ty:"Kara harekâtı",pl:"Pokrovsk çevresi",t:"Rus birliklerinin küçük gruplarla sızma girişimleri sürüyor.",src:"Clash Report",url:"https://x.com/clashreport",img:"foto"}],
+ "Sudan":[
+  {tm:"31 Eki\n14:30",ty:"Çatışma",pl:"El Fasher",t:"HDK ile ordu arasında şehrin güneyinde çatışmalar.",src:"Clash Report",url:"https://x.com/clashreport"}],
+ "Gazze":[
+  {tm:"31 Eki\n20:10",ty:"Hava saldırısı",pl:"Han Yunus",t:"Bir konuta hava saldırısı. Yerel kaynaklar sivil kayıplar olduğunu bildiriyor.",src:"TRT İbranice",url:"https://x.com/TRTHebrew",img:"foto"},
+  {tm:"31 Eki\n11:00",ty:"Diplomasi",pl:"Kahire",t:"Ateşkesin ikinci aşaması için arabulucu görüşmeleri sürüyor.",src:"VOME_TR",url:"https://x.com/VOME_TR"}],
+ "Sahel (Mali, Burkina Faso)":[
+  {tm:"29 Eki\n21:01",ty:"Üs baskını",pl:"Namssiguia, Burkina Faso",t:"JNIM militanları bir gönüllü milis (VDP) üssünü ele geçirdi.",src:"TRACTerrorism",url:"https://x.com/TracTerrorism/status/2115866521943572665",img:"foto"},
+  {tm:"29 Eki\n20:41",ty:"EYP saldırısı",pl:"Kwala–Mourdiah, Mali",t:"Mali ordusu ve Afrika Kolordusu'na ait bir araca el yapımı patlayıcıyla saldırı.",src:"TRACTerrorism",url:"https://x.com/TracTerrorism/status/2115861481296183547"}],
+ "Yemen":[
+  {tm:"29 Eki\n20:39",ty:"Topçu / hava",pl:"Taiz, ed-Dabab",t:"Hükümet güçleri Husi mevzilerini topçuyla vurdu, savaş uçakları iki hava saldırısı düzenledi.",src:"Ejaz Network",url:"https://x.com/ejaznetwork/status/2115861156476690703"},
+  {tm:"29 Eki\n20:17",ty:"İnsani durum",pl:"Taiz",t:"HRW: Husi kuşatması sivilleri gıda, su ve ilaçtan mahrum bırakıyor.",src:"VOME_TR",url:"https://x.com/VOME_TR/status/2115855431449149744"}],
+ "Suriye":[
+  {tm:"29 Eki\n20:44",ty:"Afet",pl:"Rakka, Deyrizor, Halep kırsalı",t:"Sel felaketinde 4'ü çocuk 5 kişi öldü, 5 kişi aranıyor.",src:"SANA Türk",url:"https://x.com/arap_ajans/status/2115862402990571615",img:"foto"},
+  {tm:"29 Eki\n21:03",ty:"Geri dönüş",pl:"Azez",t:"Kamplardaki 32 aile memleketlerine gönderildi.",src:"SANA Türk",url:"https://x.com/arap_ajans/status/2115867022596718870"}],
+ "Lübnan":[
+  {tm:"30 Eki\n15:20",ty:"Hava saldırısı",pl:"Güney Lübnan",t:"Sınır hattında sınırlı İsrail hava saldırıları.",src:"Clash Report",url:"https://x.com/clashreport"}]
+};
+$("fronts").innerHTML=FRONTS.map(([n,c,p,l],i)=>{const d=c-p,pc=Math.round(d/p*100);return `<button class="card front" data-f="${i}"><span class="n">${n}</span><span class="c">${c} olay <span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span></span><div class="bar" role="img" aria-label="${c} olay"><i style="width:${(c/fmax*100).toFixed(1)}%"></i></div><span class="last">${l}</span><span class="more">Olayları gör →</span></button>`;}).join("")+'<div class="sub">Örnek veri. Gerçek sürümde ACLED gibi açık çatışma veri tabanlarından ve takip ettiğin OSINT kaynaklarından beslenecek.</div>';
+const DAYS=["25","26","27","28","29","30","31"];
+function openFront(i){
+  const [n,c,p]=FRONTS[i],dl=DAILY[n],mx=Math.max(...dl),evs=EVENTS[n]||[];
+  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">Cephe · son 7 gün</span><h3 id="sh-t">${esc(n)}</h3>
+  <div class="meta"><span class="num">${c} olay</span><span>· önceki hafta ${p}</span></div>
+  <div class="mini" role="img" aria-label="Günlük olay sayıları: ${dl.join(", ")}">${dl.map((v,j)=>`<i title="${DAYS[j]} Eki: ${v} olay" style="height:${(v/mx*100).toFixed(0)}%"></i>`).join("")}</div>
+  <div class="minil">${DAYS.map(d=>`<span>${d}</span>`).join("")}</div>
+  <div class="cat" style="margin-top:6px">Son olaylar</div>
+  <div>${evs.map(e=>`<div class="ev"><span class="tm">${e.tm.replace("\n","<br>")}</span><div><span class="ty">${esc(e.ty)}</span><div class="pl">${esc(e.pl)}</div><p>${esc(e.t)}</p>${e.img?`<a class="media" href="${e.url}" target="_blank" rel="noopener"><b>${e.img==="video"?"▶ Video":"▣ Fotoğraf"}</b><span>Kaynakta aç ↗</span></a>`:""}<a href="${e.url}" target="_blank" rel="noopener">${esc(e.src)} ↗</a></div></div>`).join("")}</div>
+  <div class="sub">Örnek olaylar. Gerçek sürümde görseller kaynağın kendi önizleme fotoğrafından çekilir; videolar kaynakta açılır.</div>`;
+  $("sheet").classList.add("on");$("cls").focus();
+}
+$("fronts").addEventListener("click",e=>{const b=e.target.closest(".front");if(b)openFront(+b.dataset.f);});
+
+/* ---------- İHRACAT (örnek) ---------- */
+const EXP=[["Oca",21.2],["Şub",22.0],["Mar",23.9],["Nis",21.0],["May",24.3],["Haz",20.8],["Tem",25.0],["Ağu",21.9],["Eyl",23.4],["Eki",24.6]];
+const EXP_PREV=[19.8,20.8,23.4,20.9,24.1,19.0,22.5,21.8,22.6,24.0];
+function renderMexp(){
+  const tot=EXP.reduce((a,b)=>a+b[1],0),ptot=EXP_PREV.reduce((a,b)=>a+b,0),last=EXP[EXP.length-1][1],lp=EXP_PREV[EXP_PREV.length-1];
+  const ch=(v,p)=>{const c=(v/p-1)*100;return `<span class="d ${c>=0?"up":"down"}">${c>=0?"▲":"▼"} %${fmt(Math.abs(c),1)}</span>`;};
+  $("expkpi").innerHTML=`<div class="card kpi" style="cursor:default"><span class="l">Ekim</span><span class="v">${fmt(last,1)}</span>${ch(last,lp)}</div>
+  <div class="card kpi" style="cursor:default"><span class="l">Ocak–Ekim</span><span class="v">${fmt(tot,1)}</span>${ch(tot,ptot)}</div>
+  <div class="card kpi" style="cursor:default"><span class="l">Yıllık hedef</span><span class="v">280</span><span class="d sub">%${fmt(tot/280*100,0)} tamam</span></div>`;
+  const svg=$("mexp"),W=svg.clientWidth||440,H=170,L=30,B=22,T=14,mx=30,bw=(W-L-6)/EXP.length;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("aria-label","2026 aylık ihracat çubuk grafiği, Ekim "+fmt(last,1)+" milyar dolar");
+  const Y=v=>T+(1-v/mx)*(H-T-B);
+  svg.innerHTML=[0,10,20,30].map(t=>`<line x1="${L}" x2="${W-6}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(t)+4}" text-anchor="end" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${t}</text>`).join("")+
+  EXP.map(([m,v],i)=>{const x=L+i*bw+bw*.18,w=bw*.64,y=Y(v);return `<g class="mb" data-i="${i}"><rect x="${L+i*bw}" y="0" width="${bw}" height="${H}" fill="transparent"/><path d="M${x},${H-B}V${y+4}a4,4 0 0 1 4,-4h${w-8}a4,4 0 0 1 4,4V${H-B}Z" fill="var(--series)"/><line x1="${x-1}" x2="${x+w+1}" y1="${Y(EXP_PREV[i])}" y2="${Y(EXP_PREV[i])}" stroke="var(--ink)" stroke-width="2"/><text x="${x+w/2}" y="${H-6}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${m}</text></g>`;}).join("")+
+  `<text x="${W-6}" y="10" text-anchor="end" font-size="10.5" fill="var(--muted)">▬ 2025 aynı ay</text>`;
+  svg.onpointermove=e=>{const g=e.target.closest(".mb"),tip=$("tip2");if(!g){tip.style.display="none";return;}const i=+g.dataset.i,r=svg.getBoundingClientRect();
+    tip.style.display="block";tip.style.left=Math.max(60,Math.min(r.width-60,(L+i*bw+bw/2)*r.width/W))+"px";tip.style.top=(Y(EXP[i][1])*r.height/H)+"px";
+    tip.textContent=`${EXP[i][0]} 2026: ${fmt(EXP[i][1],1)} · 2025: ${fmt(EXP_PREV[i],1)}`;};
+  svg.onpointerleave=()=>{$("tip2").style.display="none";};
+}
+$("exptab").innerHTML=`<tr><th>Sektör</th><th class="r">Değer</th><th class="r">Yıllık</th></tr>`+
+ [["Otomotiv",34.1,6.2],["Kimya",29.0,3.1],["Elektrik-elektronik",17.2,9.8],["Hazır giyim",15.4,-4.5],["Demir-çelik",13.9,-1.2]].map(r=>`<tr><td>${r[0]}</td><td class="r num">${fmt(r[1],1)}</td><td class="r num ${r[2]>=0?"up":"down"}">${r[2]>=0?"+":"−"}%${fmt(Math.abs(r[2]),1)}</td></tr>`).join("")+
+ `<tr><th style="padding-top:14px">Ülke</th><th class="r" style="padding-top:14px">Değer</th><th class="r" style="padding-top:14px">Yıllık</th></tr>`+
+ [["Almanya",17.6,4.0],["ABD",13.1,7.3],["Birleşik Krallık",11.8,2.2],["Irak",11.0,8.9],["İtalya",10.2,1.5]].map(r=>`<tr><td>${r[0]}</td><td class="r num">${fmt(r[1],1)}</td><td class="r num ${r[2]>=0?"up":"down"}">${r[2]>=0?"+":"−"}%${fmt(Math.abs(r[2]),1)}</td></tr>`).join("");
+
+/* ---------- ERDOĞAN ---------- */
+$("rtebrief").innerHTML=[
+ "Cumhuriyet'in 103. yılını kutladı; Kıbrıs Türklerini ve yurt dışındaki vatandaşları da tebrik etti.",
+ "Türk Devletleri Teşkilatı liderlerini Beştepe'de ağırladı, resmî yemekte \"Türk asrı\" vurgusu yaptı.",
+ "Trump'la 24 saatte ikinci kez telefonda görüştü."
+].map(x=>`<li>${esc(x)}</li>`).join("");
+$("agenda").innerHTML=[
+ ["10:00","Anıtkabir ziyareti ve Devlet Erkânı ile tören","Ankara · örnek"],
+ ["13:30","29 Ekim tebrik kabulü","Beştepe · örnek"],
+ ["17:00","Türk Devletleri Teşkilatı Zirvesi açılışı","Beştepe Kongre ve Kültür Merkezi"],
+ ["20:00","Liderler onuruna resmî akşam yemeği ve konuşma","Beştepe"],
+ ["20:10","ABD Başkanı Trump ile telefon görüşmesi","Yemek sırasında"],
+ ["20:35","Kırgızistan Cumhurbaşkanı Caparov'a Türk Dünyası Ali Nişanı","Beştepe"]
+].map(([h,t,w])=>`<div><span class="h">${h}</span><span>${t}<div class="w">${w}</div></span></div>`).join("");
+$("said").innerHTML=[
+ {tp:"Türk dünyası",h:"\"Türk asrı\" için birlik çağrısı",q:"",s:"Resmî yemekte, Türk devletlerinin birlik içinde hareket etmesi gerektiğini ve 103 yıllık Cumhuriyet'in kuruluş ideallerini vurguladı.",u:"https://x.com/burhanduran/status/2115860726522785943"},
+ {tp:"Dış politika",h:"Trump'a liderlerin selamını iletti",q:"",s:"Telefon görüşmesinde zirvedeki liderlerin selamlarını iletti ve teşkilatın 13. zirvesinin Ankara'da yapılacağını söyledi.",u:"https://x.com/iletisim/status/2115853972460257713"},
+ {tp:"Cumhuriyet Bayramı",h:"103. yıl mesajı",q:"",s:"Milleti, Kıbrıs Türklerini ve dünyanın farklı yerlerindeki vatandaşları tebrik etti; Cumhuriyet'in kazanımlarla güçlendiğini söyledi.",u:"https://x.com/RTErdogan/status/2115737221055599065"},
+ {tp:"Türk dünyası",h:"Caparov'a Türk Dünyası Ali Nişanı",q:"",s:"Kırgızistan Cumhurbaşkanı'na, teşkilata katkıları nedeniyle nişan verdiğini duyurdu.",u:"https://x.com/RTErdogan/status/2115859961448378815"}
+].map(x=>`<div class="card said"><span class="topic">${x.tp}</span><h4>${esc(x.h)}</h4>${x.q?`<blockquote>${esc(x.q)}<div class="sub">Konuşmadan, aktarım</div></blockquote>`:""}<span style="font-size:14px">${esc(x.s)}</span><a href="${x.u}" target="_blank" rel="noopener">Kaynak ↗</a></div>`).join("");
 
 /* ---------- SAVUNMA ---------- */
 const DEF=[
@@ -328,15 +464,15 @@ function show(v){
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
   $("main").scrollTop=0;
-  if(v==="data"){renderKpis();renderChart();}
+  if(v==="data"){renderKpis();renderChart();renderMexp();}
   if(v==="def")renderExp();
   try{history.replaceState(null,"","#"+v);}catch(e){location.hash=v;}
 }
 $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)show(b.dataset.v);});
-window.addEventListener("resize",()=>{if($("v-data").classList.contains("on"))renderChart();if($("v-def").classList.contains("on"))renderExp();});
+window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
 renderFeed();
-window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(["feed","data","front","def"].includes(v))show(v);});
-const h=(location.hash||"").slice(1);show(["feed","data","front","def"].includes(h)?h:"feed");
+window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(["feed","data","front","def","rte"].includes(v))show(v);});
+const h=(location.hash||"").slice(1);show(["feed","data","front","def","rte"].includes(h)?h:"feed");
 </script>
 </body>
 </html>

@@ -6,9 +6,10 @@ Savaşlar, jeopolitik, iç siyaset, savunma sanayii ve Türkiye ekonomisi için 
 | Sekme | İçerik |
 |---|---|
 | **Akış** | Kaynaklardan gelen haberler sınıflanır, aynı olayı anlatanlar tek kartta birleşir. Kartta özet, kaynak sayısı ve "Resmî" / "Doğrulanmadı" etiketi bulunur. |
-| **Veriler** | USD/TRY, EUR/TRY, gram altın, BIST 100, Brent ve CDS grafikleri. Ayrıca enflasyon, faiz, işsizlik gibi makro göstergeler ve ekonomik takvim. |
-| **Cepheler** | Çatışma bölgelerinde son 7 günün olay sayısı ve değişimi. |
+| **Veriler** | USD/TRY, EUR/TRY, gram altın, ONS/USD, gümüş, BIST 100, Brent ve CDS grafikleri. Aylık ihracat (geçen yılla karşılaştırmalı), sektör ve ülke kırılımı. Ayrıca makro göstergeler ve ekonomik takvim. |
+| **Cepheler** | Çatışma bölgelerinde son 7 günün olay sayısı ve değişimi. Cepheye dokununca günlük grafik, olay listesi (saat, yer, tür), görsel önizleme ve kaynak linki açılır. |
 | **Savunma** | Savunma sanayii gündemi, test ve teslimat takvimi, ihracat verisi. |
+| **Erdoğan** | Cumhurbaşkanı'nın günlük programı, günün özeti ve konuşmalarının konu konu özeti (kaynak linkleriyle). |
 
 Prototip: [`prototype/index.html`](prototype/index.html). Bu sürümde haberler gerçek, sayılar örnek veridir.
 
@@ -18,7 +19,9 @@ GitHub Actions (her 30 dk)  ──►  collector/ (Python)
    ├─ RSS: AA, TRT Haber, SANA, Reuters, Al Jazeera, Savunma Sanayii ST ...
    ├─ Telegram: herkese açık kanalların web önizlemesi (t.me/s/<kanal>)
    ├─ TCMB EVDS API: kur, faiz, enflasyon (ücretsiz anahtar)
-   └─ Çatışma verisi: ACLED (ücretsiz kayıt, kullanım koşullarına uyarak)
+   ├─ Çatışma verisi: ACLED (ücretsiz kayıt, kullanım koşullarına uyarak)
+   ├─ İhracat: Ticaret Bakanlığı / TİM aylık açıklamaları
+   └─ Cumhurbaşkanlığı: tccb.gov.tr program ve konuşmalar, İletişim Başkanlığı
         │
         ▼
    Sınıflama + tekrar birleştirme (kural tabanlı, ücretsiz)
