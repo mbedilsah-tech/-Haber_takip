@@ -1,0 +1,412 @@
+{
+  "_not": "Kaynak listesi. Çalışmayan kaynak toplayıcıyı durdurmaz, data/meta.json içinde hata olarak görünür.",
+  "rss": [
+    {
+      "name": "AA Güncel",
+      "url": "https://www.aa.com.tr/tr/rss/default?cat=guncel"
+    },
+    {
+      "name": "AA Dünya",
+      "url": "https://www.aa.com.tr/tr/rss/default?cat=dunya"
+    },
+    {
+      "name": "AA Ekonomi",
+      "url": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
+    },
+    {
+      "name": "AA Politika",
+      "url": "https://www.aa.com.tr/tr/rss/default?cat=politika"
+    },
+    {
+      "name": "BBC Türkçe",
+      "url": "https://feeds.bbci.co.uk/turkce/rss.xml"
+    },
+    {
+      "name": "DW Türkçe",
+      "url": "https://rss.dw.com/rdf/rss-tur-all"
+    },
+    {
+      "name": "Euronews Türkçe",
+      "url": "https://tr.euronews.com/rss"
+    },
+    {
+      "name": "Al Jazeera",
+      "url": "https://www.aljazeera.com/xml/rss/all.xml"
+    },
+    {
+      "name": "Times of Israel",
+      "url": "https://www.timesofisrael.com/feed/"
+    },
+    {
+      "name": "Middle East Eye",
+      "url": "https://www.middleeasteye.net/rss"
+    },
+    {
+      "name": "Defense News",
+      "url": "https://www.defensenews.com/arc/outboundfeeds/rss/"
+    },
+    {
+      "name": "SavunmaSanayiST",
+      "url": "https://www.savunmasanayist.com/feed/"
+    },
+    {
+      "name": "Cumhurbaşkanlığı",
+      "url": "https://www.tccb.gov.tr/rss/haberler.xml",
+      "official": true
+    }
+  ],
+  "gnews": [
+    {
+      "q": "Suriye when:1d"
+    },
+    {
+      "q": "İsrail Gazze when:1d"
+    },
+    {
+      "q": "Ukrayna Rusya when:1d"
+    },
+    {
+      "q": "İran ABD when:1d"
+    },
+    {
+      "q": "Baykar OR Roketsan OR ASELSAN OR TUSAŞ OR \"savunma sanayii\" when:1d"
+    },
+    {
+      "q": "TCMB OR enflasyon OR ihracat OR \"Merkez Bankası\" when:1d"
+    },
+    {
+      "q": "TBMM OR \"AK Parti\" OR CHP OR MHP when:1d"
+    },
+    {
+      "q": "\"Cumhurbaşkanı Erdoğan\" when:1d",
+      "tag": "rte"
+    },
+    {
+      "q": "Yemen OR Sudan OR Sahel OR Lübnan when:1d"
+    }
+  ],
+  "telegram": [
+    {
+      "name": "Ukrayna Hava Kuvvetleri",
+      "channel": "kpszsu"
+    },
+    {
+      "name": "Clash Report",
+      "channel": "clashreport"
+    },
+    {
+      "name": "Middle East Spectator",
+      "channel": "Middle_East_Spectator"
+    }
+  ],
+  "official_sources": [
+    "Cumhurbaşkanlığı",
+    "T.C. Cumhurbaşkanlığı",
+    "İletişim Başkanlığı",
+    "Dışişleri Bakanlığı",
+    "Milli Savunma Bakanlığı",
+    "Ukrayna Hava Kuvvetleri",
+    "TCMB",
+    "SANA"
+  ],
+  "categories": {
+    "war": [
+      "saldırı",
+      "çatışma",
+      "füze",
+      "bomba",
+      "İHA",
+      "SİHA",
+      "hava saldırısı",
+      "ateşkes",
+      "cephe",
+      "asker",
+      "öldü",
+      "hayatını kaybetti",
+      "yaralandı",
+      "operasyon",
+      "terör",
+      "militan",
+      "strike",
+      "attack",
+      "killed",
+      "missile",
+      "drone",
+      "troops",
+      "ceasefire",
+      "shelling",
+      "Husi",
+      "Hamas",
+      "Hizbullah",
+      "DEAŞ",
+      "PKK",
+      "YPG",
+      "SDG"
+    ],
+    "geo": [
+      "Trump",
+      "Putin",
+      "Netanyahu",
+      "NATO",
+      "BM",
+      "AB",
+      "zirve",
+      "Dışişleri",
+      "büyükelçi",
+      "diplomasi",
+      "müzakere",
+      "yaptırım",
+      "seçim",
+      "Beyaz Saray",
+      "Kremlin",
+      "Fidan",
+      "summit",
+      "sanctions",
+      "talks",
+      "election",
+      "Şara",
+      "Şeybani",
+      "Türk dünyası",
+      "Türk Devletleri"
+    ],
+    "pol": [
+      "TBMM",
+      "Meclis",
+      "AK Parti",
+      "CHP",
+      "MHP",
+      "DEM",
+      "İYİ Parti",
+      "Bahçeli",
+      "Özel",
+      "İmamoğlu",
+      "belediye",
+      "bakan",
+      "kabine",
+      "kanun",
+      "yargı",
+      "mahkeme",
+      "gözaltı",
+      "tutuklandı",
+      "soruşturma",
+      "İçişleri",
+      "Adalet Bakanı"
+    ],
+    "def": [
+      "Baykar",
+      "Roketsan",
+      "ASELSAN",
+      "TUSAŞ",
+      "HAVELSAN",
+      "MKE",
+      "STM",
+      "savunma sanayii",
+      "KAAN",
+      "HÜRJET",
+      "ANKA",
+      "Akıncı",
+      "TB2",
+      "TB3",
+      "Kızılelma",
+      "Altay",
+      "SİPER",
+      "TCG",
+      "fırlatma",
+      "test atışı",
+      "ihracat sözleşmesi",
+      "SSB",
+      "Görgün",
+      "defense",
+      "fighter jet",
+      "F-35",
+      "F-16",
+      "Eurofighter"
+    ],
+    "eco": [
+      "TCMB",
+      "Merkez Bankası",
+      "enflasyon",
+      "faiz",
+      "dolar",
+      "euro",
+      "altın",
+      "borsa",
+      "BIST",
+      "ihracat",
+      "ithalat",
+      "cari açık",
+      "büyüme",
+      "Şimşek",
+      "Hazine",
+      "bütçe",
+      "vergi",
+      "asgari ücret",
+      "TÜİK",
+      "kredi",
+      "petrol",
+      "doğalgaz",
+      "economy",
+      "inflation",
+      "oil"
+    ]
+  },
+  "exclude": [
+    "maç",
+    "gol",
+    "transfer",
+    "futbol",
+    "basketbol",
+    "Süper Lig",
+    "teknik direktör",
+    "dizi",
+    "magazin",
+    "burç",
+    "tarif",
+    "hava durumu",
+    "konser",
+    "playoff",
+    "NBA"
+  ],
+  "fronts": {
+    "Ukrayna–Rusya": [
+      "Ukrayna",
+      "Ukrain",
+      "Kiev",
+      "Kyiv",
+      "Harkov",
+      "Kharkiv",
+      "Zaporij",
+      "Donetsk",
+      "Pokrovsk",
+      "Zelenski",
+      "Zelensky",
+      "Kursk",
+      "Odesa"
+    ],
+    "Gazze": [
+      "Gazze",
+      "Gaza",
+      "Hamas",
+      "Refah",
+      "Rafah",
+      "Han Yunus",
+      "Khan Younis",
+      "Batı Şeria",
+      "West Bank"
+    ],
+    "Suriye": [
+      "Suriye",
+      "Syria",
+      "Şam",
+      "Damascus",
+      "Halep",
+      "Aleppo",
+      "İdlib",
+      "Deyrizor",
+      "Rakka",
+      "SDG",
+      "SDF",
+      "Şara",
+      "Sharaa",
+      "Suveyda"
+    ],
+    "Lübnan": [
+      "Lübnan",
+      "Lebanon",
+      "Hizbullah",
+      "Hezbollah",
+      "Beyrut",
+      "Beirut"
+    ],
+    "Yemen": [
+      "Yemen",
+      "Husi",
+      "Houthi",
+      "Sana",
+      "Taiz",
+      "Hudeyde",
+      "Kızıldeniz",
+      "Red Sea"
+    ],
+    "Sudan": [
+      "Sudan",
+      "Hartum",
+      "Khartoum",
+      "El Fasher",
+      "HDK",
+      "RSF",
+      "Darfur"
+    ],
+    "Sahel": [
+      "Mali",
+      "Burkina",
+      "Nijer",
+      "Niger",
+      "Sahel",
+      "JNIM"
+    ],
+    "İran": [
+      "İran",
+      "Iran",
+      "Tahran",
+      "Tehran",
+      "Hamaney",
+      "Khamenei",
+      "Galibaf"
+    ],
+    "Irak": [
+      "Irak",
+      "Iraq",
+      "Bağdat",
+      "Baghdad",
+      "Erbil",
+      "Kerkük"
+    ]
+  },
+  "rte_topics": {
+    "Dış politika": [
+      "Trump",
+      "Putin",
+      "NATO",
+      "AB",
+      "BM",
+      "zirve",
+      "telefon",
+      "görüştü",
+      "Gazze",
+      "İsrail",
+      "Suriye",
+      "Ukrayna",
+      "Türk Devletleri",
+      "Türk dünyası",
+      "Türk Devletleri Teşkilatı"
+    ],
+    "Ekonomi": [
+      "ekonomi",
+      "enflasyon",
+      "yatırım",
+      "ihracat",
+      "büyüme",
+      "faiz",
+      "asgari"
+    ],
+    "Güvenlik": [
+      "terör",
+      "Terörsüz",
+      "PKK",
+      "güvenlik",
+      "savunma",
+      "TSK"
+    ],
+    "İç siyaset": [
+      "CHP",
+      "muhalefet",
+      "AK Parti",
+      "kongre",
+      "seçim",
+      "anayasa",
+      "Meclis",
+      "grup toplantısı"
+    ]
+  }
+}

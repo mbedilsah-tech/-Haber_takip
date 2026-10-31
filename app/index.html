@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1622">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Haber Takip">
+<title>Haber Takip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: telefon genişliğinde tek sütun uygulama; üstte başlık, ortada kaydırılan içerik, altta 4 sekmeli gezinme */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --ink:#0f1824; --muted:#5d6878; --line:#d9dee6;
+  --accent:#b4530e; --accent-soft:#fbeadb; --series:#2457c5; --series-soft:rgba(36,87,197,.12);
+  --up:#13784a; --down:#b42323; --warn:#9a5b00; --warn-soft:#fff0d4; --ok:#13784a; --ok-soft:#dcf2e6;
+  --display:"Barlow Condensed", "Arial Narrow", sans-serif;
+  --body:"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b121c; --surface:#131d2a; --ink:#e6ebf2; --muted:#93a0b2; --line:#233246;
+    --accent:#f0954a; --accent-soft:#3a2413; --series:#78a2ff; --series-soft:rgba(120,162,255,.16);
+    --up:#5fd08f; --down:#ff7b7b; --warn:#f2b55c; --warn-soft:#35270f; --ok:#5fd08f; --ok-soft:#123222;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b121c; --surface:#131d2a; --ink:#e6ebf2; --muted:#93a0b2; --line:#233246;
+  --accent:#f0954a; --accent-soft:#3a2413; --series:#78a2ff; --series-soft:rgba(120,162,255,.16);
+  --up:#5fd08f; --down:#ff7b7b; --warn:#f2b55c; --warn-soft:#35270f; --ok:#5fd08f; --ok-soft:#123222;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;background:var(--bg);border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:14px 16px 10px;background:var(--surface);border-bottom:1px solid var(--line)}
+.brand{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.02em;line-height:1;text-transform:uppercase}
+.brand span{color:var(--accent)}
+.upd{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
+.proto{background:var(--accent-soft);color:var(--accent);font-size:12px;font-weight:600;padding:6px 16px;text-align:center}
+main{flex:1;overflow-y:auto;padding:14px 16px 24px;display:flex;flex-direction:column;gap:14px}
+.view{display:none;flex-direction:column;gap:14px}
+.view.on{display:flex}
+h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.03em;text-transform:uppercase;margin:4px 0 0;text-wrap:balance}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.brief{border-left:3px solid var(--accent)}
+.brief h3{margin:0 0 6px;font-size:13px;font-family:var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+.brief ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 13px;font-size:13px;font-weight:500;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.story{display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;width:100%}
+.story:hover{border-color:var(--muted)}
+.cat{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.story h4{margin:0;font-size:16px;font-weight:600;line-height:1.35;text-wrap:balance}
+.story p{margin:0;color:var(--muted);font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.tag{font-size:10.5px;font-weight:600;letter-spacing:.04em;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.tag.u{background:var(--warn-soft);color:var(--warn)}
+.tag.o{background:var(--ok-soft);color:var(--ok)}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+/* KPI */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{display:flex;flex-direction:column;gap:2px;cursor:pointer;text-align:left;padding:12px}
+.kpi[aria-pressed="true"]{border-color:var(--series);box-shadow:inset 0 0 0 1px var(--series)}
+.kpi .l{font-size:12px;color:var(--muted)}
+.kpi .v{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums}
+.kpi .d{font-family:var(--mono);font-size:12px}
+.up{color:var(--up)} .down{color:var(--down)}
+.kpi svg{width:100%;height:30px;margin-top:4px}
+.chartcard{display:flex;flex-direction:column;gap:8px}
+.charthead{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.charthead b{font-size:15px}
+.seg{display:flex;gap:4px}
+.seg button{border:1px solid var(--line);background:transparent;border-radius:6px;padding:3px 9px;font-size:12px;font-family:var(--mono);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chartwrap{position:relative}
+.chartwrap svg{width:100%;height:190px;display:block;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:12px var(--mono);padding:4px 8px;border-radius:5px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+td{padding:9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:none}
+.sub{font-size:11.5px;color:var(--muted)}
+/* Cepheler */
+.front{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 14px}
+.front .n{font-weight:600}
+.front .c{font-family:var(--mono);font-size:13px;text-align:right}
+.bar{grid-column:1/-1;height:8px;background:var(--series-soft);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--series);border-radius:0 4px 4px 0}
+.front .last{grid-column:1/-1;font-size:13px;color:var(--muted)}
+.cal{display:flex;flex-direction:column}
+.cal div{display:grid;grid-template-columns:58px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.cal div:last-child{border-bottom:none}
+.cal .dt{font-family:var(--mono);font-size:12px;color:var(--accent);padding-top:2px}
+/* Alt sekme */
+/* Cephe detayı & olaylar */
+.front{cursor:pointer;text-align:left;width:100%}
+.front:hover{border-color:var(--muted)}
+.front .more{grid-column:1/-1;font-size:12px;color:var(--accent);font-weight:600}
+.ev{display:grid;grid-template-columns:44px 1fr;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ev:last-child{border-bottom:none}
+.ev .tm{font-family:var(--mono);font-size:11.5px;color:var(--muted);line-height:1.35}
+.ev .ty{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent)}
+.ev .pl{font-weight:600;font-size:14px}
+.ev p{margin:2px 0 6px;font-size:14px}
+.ev a{font-family:var(--mono);font-size:12px;color:var(--series);text-decoration:none}
+.media{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;height:150px;border-radius:8px;margin:6px 0;padding:10px;color:#fff;font-size:12px;text-decoration:none;
+  background:linear-gradient(160deg,rgba(15,24,36,.15),rgba(15,24,36,.85)),repeating-linear-gradient(135deg,#4a5a6e 0 14px,#55667b 14px 28px)}
+.media b{font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.55);padding:3px 7px;border-radius:4px;font-weight:500}
+.media span{background:rgba(0,0,0,.55);padding:3px 7px;border-radius:4px}
+.mini{flex-shrink:0;display:flex;align-items:flex-end;gap:4px;height:56px}
+.mini i{flex:1;background:var(--series);border-radius:3px 3px 0 0;min-height:3px}
+.minil{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+/* Erdoğan */
+.agenda{display:flex;flex-direction:column}
+.agenda>div{display:grid;grid-template-columns:52px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.agenda>div:last-child{border-bottom:none}
+.agenda .h{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.agenda .w{font-size:12px;color:var(--muted)}
+.said{display:flex;flex-direction:column;gap:6px}
+.said .topic{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.said h4{margin:0;font-size:15.5px;line-height:1.35}
+.said blockquote{margin:2px 0;padding:6px 10px;border-left:3px solid var(--accent);background:var(--bg);font-size:14px;border-radius:0 6px 6px 0}
+.said a{font-family:var(--mono);font-size:12px;color:var(--series);text-decoration:none}
+.ttl{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+nav{display:grid;grid-template-columns:repeat(5,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{background:none;border:none;padding:9px 0 10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;color:var(--muted);cursor:pointer}
+nav button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+nav button[aria-selected="true"]{color:var(--accent);font-weight:600}
+/* Detay paneli */
+.sheet{position:fixed;inset:0;background:rgba(5,10,18,.55);display:none;align-items:flex-end;justify-content:center;z-index:5}
+.sheet.on{display:flex}
+.sheet .in{background:var(--surface);width:100%;max-width:480px;max-height:85%;overflow-y:auto;border-radius:16px 16px 0 0;padding:18px 16px 28px;display:flex;flex-direction:column;gap:10px}
+.sheet h3{margin:0;font-size:19px;line-height:1.3}
+.sheet .why{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:14px}
+.srcs a{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:14px}
+.srcs a span{color:var(--muted);font-family:var(--mono);font-size:12px}
+.close{align-self:flex-end;border:1px solid var(--line);background:transparent;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:13px}
+@media (prefers-reduced-motion: no-preference){.sheet .in{animation:up .2s ease-out}@keyframes up{from{transform:translateY(20px)}to{transform:none}}}
+.top{padding-top:calc(14px + env(safe-area-inset-top))}
+a.media{position:relative;overflow:hidden;background:var(--line)}
+a.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+a.media b,a.media span{position:relative;color:#fff}
+.story .thumb{width:100%;height:150px;object-fit:cover;border-radius:6px;background:var(--line)}
+.badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.state{padding:40px 10px;text-align:center;color:var(--muted)}
+.srcs a .st{display:flex;gap:6px;align-items:center}
+.more-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px;cursor:pointer;font-weight:500}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">Haber<span>·</span>Takip</div>
+    <div class="upd">Son güncelleme<br><span id="upd">—</span></div>
+  </div>
+  <main id="main">
+    <section class="view on" id="v-feed" aria-label="Akış">
+      <div class="card brief"><h3>Öne çıkanlar</h3><ul id="brief"></ul></div>
+      <div class="chips" id="feedchips" role="group" aria-label="Konu"></div>
+      <div id="stories" style="display:flex;flex-direction:column;gap:10px"><div class="state">Yükleniyor…</div></div>
+    </section>
+
+    <section class="view" id="v-data" aria-label="Veriler">
+      <h2>Piyasa</h2>
+      <div class="kpis" id="kpis"></div>
+      <div class="card chartcard">
+        <div class="charthead"><b id="ctitle"></b><div class="seg" id="range" role="group" aria-label="Zaman aralığı"></div></div>
+        <div class="chartwrap"><svg id="chart" role="img"></svg><div class="tip" id="tip"></div></div>
+      </div>
+      <h2>İhracat</h2>
+      <div class="card chartcard">
+        <div class="charthead"><b id="exptitle">Aylık ihracat, milyar $</b><span class="sub" id="expsrc"></span></div>
+        <div class="kpis" style="grid-template-columns:1fr 1fr 1fr" id="expkpi"></div>
+        <div class="chartwrap"><svg id="mexp" style="width:100%;height:170px;display:block" role="img"></svg><div class="tip" id="tip2"></div></div>
+      </div>
+      <div class="card"><div class="ttl"><b style="font-size:15px">Sektörler ve ülkeler</b><span class="sub">Yıl başından bu yana, milyar $</span></div><table id="exptab" style="margin-top:6px"></table></div>
+      <h2>Makro göstergeler</h2>
+      <div class="card"><table id="macro"></table></div>
+      <h2>Ekonomik takvim</h2>
+      <div class="card cal" id="ecal"></div>
+    </section>
+
+    <section class="view" id="v-front" aria-label="Cepheler">
+      <h2>Cepheler · son 7 gün</h2>
+      <div class="sub" id="frontnote"></div>
+      <div id="fronts" style="display:flex;flex-direction:column;gap:10px"></div>
+    </section>
+
+    <section class="view" id="v-def" aria-label="Savunma">
+      <h2>Savunma sanayii gündemi</h2>
+      <div id="defstories" style="display:flex;flex-direction:column;gap:10px"></div>
+      <h2>Takvim</h2>
+      <div class="card cal" id="dcal"></div>
+      <h2>Savunma ihracatı</h2>
+      <div class="card chartcard">
+        <div class="charthead"><b>Yıllık ihracat, milyar $</b><span class="sub" id="dexpsrc"></span></div>
+        <svg id="expchart" style="width:100%;height:170px" role="img" aria-label="Yıllara göre savunma ihracatı"></svg>
+      </div>
+    </section>
+
+    <section class="view" id="v-rte" aria-label="Cumhurbaşkanı">
+      <h2>Cumhurbaşkanı Erdoğan · bugün</h2>
+      <div class="card brief"><h3>Öne çıkanlar</h3><ul id="rtebrief"></ul></div>
+      <h2>Neler yaptı</h2>
+      <div class="card agenda" id="agenda"></div>
+      <h2>Neler dedi</h2>
+      <div id="said" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div class="sub">Son 30 saatte Erdoğan'ın geçtiği haberlerden otomatik derlenir. Her maddenin kaynağı linklidir.</div>
+    </section>
+  </main>
+  <nav role="tablist" id="nav">
+    <button role="tab" aria-selected="true" data-v="feed"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></svg>Akış</button>
+    <button role="tab" aria-selected="false" data-v="data"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Veriler</button>
+    <button role="tab" aria-selected="false" data-v="front"><svg viewBox="0 0 24 24"><circle cx="12" cy="10" r="3"/><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/></svg>Cepheler</button>
+    <button role="tab" aria-selected="false" data-v="def"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.6-3.4 8.3-8 9-4.6-.7-8-4.4-8-9V6z"/></svg>Savunma</button>
+    <button role="tab" aria-selected="false" data-v="rte"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V10M19 21V10M9 21v-6h6v6M2 10l10-6 10 6"/></svg>Erdoğan</button>
+  </nav>
+</div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t"><div class="in" id="sheetin"></div></div>
+
+<script>
+/* Veri adresi: GitHub Pages'te uygulamanın yanındaki data/ klasörü. APK'da tam adres verilecek. */
+const DATA_BASE = window.HT_DATA_BASE || "./data/";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=(v,d=2)=>Number(v).toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const MONTHS=["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const trTime=iso=>new Date(iso).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit",timeZone:"Europe/Istanbul"});
+const trDate=iso=>{const d=new Date(iso);return d.toLocaleDateString("tr-TR",{day:"numeric",month:"short",timeZone:"Europe/Istanbul"});};
+function ago(iso){const m=Math.max(0,Math.round((Date.now()-new Date(iso))/60000));if(m<60)return m+" dk önce";const h=Math.round(m/60);if(h<24)return h+" sa önce";return Math.round(h/24)+" gün önce";}
+const safeUrl=u=>/^https?:\/\//.test(u||"")?u:"#";
+let D={news:null,markets:null,fronts:null,rte:null,manual:null,meta:null};
+
+/* ---------- ortak: hikâye kartı ve detay ---------- */
+const CATS=[["all","Tümü"],["war","Çatışmalar"],["geo","Jeopolitik"],["pol","İç siyaset"],["def","Savunma"],["eco","Ekonomi"],["gen","Gündem"]];
+const catLabel=k=>(CATS.find(c=>c[0]===k)||[,"Gündem"])[1];
+const STORY_INDEX=new Map();
+function tags(s){return (s.official?'<span class="tag o">Resmî</span>':"")+(s.unverified?'<span class="tag u">Doğrulanmadı</span>':"");}
+function storyCard(s,opts={}){
+  STORY_INDEX.set(s.id,s);
+  const img=opts.thumb&&s.img?`<img class="thumb" src="${esc(safeUrl(s.img))}" alt="" loading="lazy" onerror="this.remove()">`:"";
+  return `<button class="card story" data-id="${esc(s.id)}">${img}<span class="cat">${catLabel(s.cat)}${s.fronts&&s.fronts.length?" · "+esc(s.fronts[0]):""}</span><h4>${esc(s.title)}</h4>${s.summary?`<p>${esc(s.summary)}</p>`:""}<div class="meta">${tags(s)}<span>${s.n} kaynak</span><span>· ${ago(s.last)}</span>${s.media==="video"?'<span>· ▶ video</span>':""}</div></button>`;
+}
+function mediaBlock(s){
+  if(!s.img&&!s.media)return "";
+  const u=esc(safeUrl(s.media_url||s.sources[0]?.url));
+  return `<a class="media" href="${u}" target="_blank" rel="noopener">${s.img?`<img src="${esc(safeUrl(s.img))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${s.media==="video"?"▶ Video":"▣ Fotoğraf"}</b><span>Kaynakta aç ↗</span></a>`;
+}
+function openStory(s){
+  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.last)} ${trTime(s.last)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${s.summary?`<p style="margin:0">${esc(s.summary)}</p>`:""}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
+  $("sheet").classList.add("on");$("cls").focus();
+}
+document.addEventListener("click",e=>{const b=e.target.closest(".story");if(b&&STORY_INDEX.has(b.dataset.id))openStory(STORY_INDEX.get(b.dataset.id));});
+$("sheet").addEventListener("click",e=>{if(e.target.id==="sheet"||e.target.id==="cls")$("sheet").classList.remove("on");});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("sheet").classList.remove("on");});
+
+/* ---------- AKIŞ ---------- */
+let fcat="all",fshow=30;
+function renderFeed(){
+  const n=D.news;if(!n){$("stories").innerHTML='<div class="state">Haberler yüklenemedi. Bağlantını kontrol edip sayfayı yenile.</div>';return;}
+  n.stories.forEach(s=>STORY_INDEX.set(s.id,s));
+  $("brief").innerHTML=n.brief.map(b=>`<li><a href="#" data-id="${esc(b.id)}" class="bl" style="color:inherit;text-decoration:none">${esc(b.title)}</a></li>`).join("");
+  const counts={};n.stories.forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
+  $("feedchips").innerHTML=CATS.filter(([k])=>k==="all"||counts[k]).map(([k,l])=>`<button class="chip" aria-pressed="${k===fcat}" data-k="${k}">${l}${k!=="all"?" "+counts[k]:""}</button>`).join("");
+  const list=n.stories.filter(s=>fcat==="all"||s.cat===fcat);
+  $("stories").innerHTML=(list.slice(0,fshow).map((s,i)=>storyCard(s,{thumb:i<3})).join("")||'<div class="card sub">Bu başlıkta yeni haber yok.</div>')+(list.length>fshow?`<button class="more-btn" id="morebtn">Daha fazla göster (${list.length-fshow})</button>`:"");
+}
+$("feedchips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;fcat=b.dataset.k;fshow=30;renderFeed();});
+$("stories").addEventListener("click",e=>{if(e.target.id==="morebtn"){fshow+=30;renderFeed();}});
+$("brief").addEventListener("click",e=>{const a=e.target.closest(".bl");if(!a)return;e.preventDefault();const s=STORY_INDEX.get(a.dataset.id);if(s)openStory(s);});
+
+/* ---------- VERİLER ---------- */
+let sel=null,rng=90;
+const RANGES=[[30,"1A"],[90,"3A"],[365,"1Y"]];
+function spark(a){const w=100,h=30,mn=Math.min(...a),mx=Math.max(...a);const p=a.map((v,i)=>`${(i/(a.length-1||1)*w).toFixed(1)},${(h-2-(v-mn)/(mx-mn||1)*(h-4)).toFixed(1)}`).join(" ");return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${p}" fill="none" stroke="var(--series)" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg>`;}
+function renderKpis(){
+  const S=D.markets?.series;if(!S||!Object.keys(S).length){$("kpis").innerHTML='<div class="card sub" style="grid-column:1/-1">Piyasa verisi şu an alınamadı.</div>';return;}
+  if(!sel||!S[sel])sel=Object.keys(S)[0];
+  $("kpis").innerHTML=Object.entries(S).map(([k,s])=>{const a=s.points.slice(-30).map(p=>p[1]);if(!a.length)return "";const v=a[a.length-1],p=a.length>1?a[a.length-2]:v,ch=(v/p-1)*100;
+    return `<button class="card kpi" aria-pressed="${k===sel}" data-k="${k}"><span class="l">${esc(s.label)}</span><span class="v">${fmt(v,s.decimals)}</span><span class="d ${ch>=0?"up":"down"}">${ch>=0?"▲":"▼"} ${fmt(Math.abs(ch),2)}%</span>${a.length>1?spark(a):""}</button>`;}).join("");
+}
+$("kpis").addEventListener("click",e=>{const b=e.target.closest(".kpi");if(!b)return;sel=b.dataset.k;renderKpis();renderChart();});
+$("range").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;rng=+b.dataset.r;renderChart();});
+const dlabel=s=>{const [y,m,d]=s.split("-");return (+d)+" "+MONTHS[+m-1];};
+function niceTicks(mn,mx,c){const st=Math.pow(10,Math.floor(Math.log10((mx-mn)/c||1)));const m=[1,2,2.5,5,10].find(m=>(mx-mn)/(st*m)<=c)*st;const t=[];for(let v=Math.ceil(mn/m)*m;v<=mx+1e-9;v+=m)t.push(+v.toFixed(6));return t;}
+let CH=null;
+function renderChart(){
+  const S=D.markets?.series;if(!S||!S[sel]){$("chart").innerHTML="";return;}
+  const k=S[sel];$("ctitle").textContent=k.label;
+  $("range").innerHTML=RANGES.map(([r,l])=>`<button data-r="${r}" aria-pressed="${r===rng}">${l}</button>`).join("");
+  const pts=k.points.slice(-rng);if(pts.length<2){$("chart").innerHTML="";return;}
+  const a=pts.map(p=>p[1]);
+  const svg=$("chart"),W=svg.clientWidth||440,H=190,L=50,R=10,T=10,B=24;
+  let mn=Math.min(...a),mx=Math.max(...a);const pad=(mx-mn)*.08||1;mn-=pad;mx+=pad;
+  const ticks=niceTicks(mn,mx,4);mn=Math.min(mn,ticks[0]);mx=Math.max(mx,ticks[ticks.length-1]);
+  const X=i=>L+i/(a.length-1)*(W-L-R),Y=v=>T+(1-(v-mn)/(mx-mn))*(H-T-B);
+  const path=a.map((v,i)=>(i?"L":"M")+X(i).toFixed(1)+","+Y(v).toFixed(1)).join("");
+  const xt=[0,Math.floor((a.length-1)/2),a.length-1];
+  const td=k.decimals>0&&mx<1000?1:0;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("aria-label",`${k.label}, ${fmt(a[0],k.decimals)} ile ${fmt(a[a.length-1],k.decimals)} arası`);
+  svg.innerHTML=`${ticks.map(t=>`<line x1="${L}" x2="${W-R}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(t)+4}" text-anchor="end" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${fmt(t,td)}</text>`).join("")}
+  ${xt.map((i,j)=>`<text x="${X(i)}" y="${H-6}" text-anchor="${j===0?"start":j===2?"end":"middle"}" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${dlabel(pts[i][0])}</text>`).join("")}
+  <path d="${path}L${X(a.length-1)},${H-B}L${X(0)},${H-B}Z" fill="var(--series-soft)"/>
+  <path d="${path}" fill="none" stroke="var(--series)" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="${X(a.length-1)}" cy="${Y(a[a.length-1])}" r="4" fill="var(--series)" stroke="var(--surface)" stroke-width="2"/>
+  <line id="xh" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="3 3" style="display:none"/>
+  <circle id="xd" r="4" fill="var(--series)" stroke="var(--surface)" stroke-width="2" style="display:none"/>`;
+  CH={a,pts,X,Y,k,W,L,R};
+}
+function hover(e){
+  if(!CH)return;const svg=$("chart"),r=svg.getBoundingClientRect();const px=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const sx=px*(CH.W/r.width);
+  const i=Math.max(0,Math.min(CH.a.length-1,Math.round((sx-CH.L)/(CH.W-CH.L-CH.R)*(CH.a.length-1))));
+  const x=CH.X(i),y=CH.Y(CH.a[i]),xh=$("xh"),xd=$("xd"),tip=$("tip");
+  xh.setAttribute("x1",x);xh.setAttribute("x2",x);xh.style.display="";xd.setAttribute("cx",x);xd.setAttribute("cy",y);xd.style.display="";
+  tip.style.display="block";tip.style.left=Math.max(50,Math.min(r.width-50,x*r.width/CH.W))+"px";tip.style.top=(y*r.height/190)+"px";
+  tip.textContent=dlabel(CH.pts[i][0])+" · "+fmt(CH.a[i],CH.k.decimals);
+}
+function unhover(){$("tip").style.display="none";const xh=$("xh"),xd=$("xd");if(xh)xh.style.display="none";if(xd)xd.style.display="none";}
+$("chart").addEventListener("pointermove",hover);$("chart").addEventListener("pointerleave",unhover);
+$("chart").addEventListener("touchmove",hover,{passive:true});$("chart").addEventListener("touchend",unhover);
+
+const ornek=o=>o&&o.ornek?' <span class="badge">örnek</span>':"";
+function renderManual(){
+  const M=D.manual;if(!M)return;
+  const E=M.exports;
+  if(E){
+    $("exptitle").innerHTML=`Aylık ihracat, milyar $ · ${E.year}${ornek(E)}`;$("expsrc").textContent="Kaynak: "+E.source;
+    const tot=E.months.reduce((a,b)=>a+b[1],0),ptot=E.prev.slice(0,E.months.length).reduce((a,b)=>a+b,0),li=E.months.length-1,last=E.months[li][1],lp=E.prev[li];
+    const ch=(v,p)=>{const c=(v/p-1)*100;return `<span class="d ${c>=0?"up":"down"}">${c>=0?"▲":"▼"} %${fmt(Math.abs(c),1)}</span>`;};
+    $("expkpi").innerHTML=`<div class="card kpi" style="cursor:default"><span class="l">${E.months[li][0]}</span><span class="v">${fmt(last,1)}</span>${ch(last,lp)}</div><div class="card kpi" style="cursor:default"><span class="l">Yıl başından</span><span class="v">${fmt(tot,1)}</span>${ch(tot,ptot)}</div><div class="card kpi" style="cursor:default"><span class="l">Yıllık hedef</span><span class="v">${E.target}</span><span class="d sub">%${fmt(tot/E.target*100,0)} tamam</span></div>`;
+    renderMexp();
+    const row=r=>`<tr><td>${esc(r[0])}</td><td class="r num">${fmt(r[1],1)}</td><td class="r num ${r[2]>=0?"up":"down"}">${r[2]>=0?"+":"−"}%${fmt(Math.abs(r[2]),1)}</td></tr>`;
+    $("exptab").innerHTML=`<tr><th>Sektör</th><th class="r">Değer</th><th class="r">Yıllık</th></tr>`+E.sectors.map(row).join("")+`<tr><th style="padding-top:14px">Ülke</th><th class="r" style="padding-top:14px">Değer</th><th class="r" style="padding-top:14px">Yıllık</th></tr>`+E.countries.map(row).join("");
+  }
+  if(M.macro)$("macro").innerHTML=`<tr><th>Gösterge${ornek(M.macro)}</th><th class="r">Son değer</th><th class="r">Sonraki</th></tr>`+M.macro.rows.map(m=>`<tr><td>${esc(m[0])}<div class="sub">${esc(m[2])}</div></td><td class="r num">${esc(m[1])}</td><td class="r num sub">${esc(m[3])}</td></tr>`).join("");
+  const cal=(el,c)=>{if(c)$(el).innerHTML=c.items.map(([d,t])=>`<div><span class="dt">${esc(d)}</span><span>${esc(t)}</span></div>`).join("")+(c.ornek?'<div class="sub" style="border:none;display:block"><span class="badge">örnek takvim</span></div>':"");};
+  cal("ecal",M.calendar);cal("dcal",M.defense_calendar);
+  if(M.defense_exports)$("dexpsrc").innerHTML=esc(M.defense_exports.source)+ornek(M.defense_exports);
+}
+function renderMexp(){
+  const E=D.manual?.exports;if(!E)return;
+  const svg=$("mexp"),W=svg.clientWidth||440,H=170,L=30,B=22,T=14,mx=Math.ceil(Math.max(...E.months.map(m=>m[1]),...E.prev)/10)*10,bw=(W-L-6)/E.months.length;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const Y=v=>T+(1-v/mx)*(H-T-B);
+  svg.innerHTML=[0,mx/2,mx].map(t=>`<line x1="${L}" x2="${W-6}" y1="${Y(t)}" y2="${Y(t)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(t)+4}" text-anchor="end" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${t}</text>`).join("")+
+  E.months.map(([m,v],i)=>{const x=L+i*bw+bw*.18,w=bw*.64,y=Y(v);return `<g class="mb" data-i="${i}"><rect x="${L+i*bw}" y="0" width="${bw}" height="${H}" fill="transparent"/><path d="M${x},${H-B}V${y+4}a4,4 0 0 1 4,-4h${w-8}a4,4 0 0 1 4,4V${H-B}Z" fill="var(--series)"/>${E.prev[i]!=null?`<line x1="${x-1}" x2="${x+w+1}" y1="${Y(E.prev[i])}" y2="${Y(E.prev[i])}" stroke="var(--ink)" stroke-width="2"/>`:""}<text x="${x+w/2}" y="${H-6}" text-anchor="middle" font-size="10" font-family="JetBrains Mono,monospace" fill="var(--muted)">${m}</text></g>`;}).join("")+
+  `<text x="${W-6}" y="10" text-anchor="end" font-size="10.5" fill="var(--muted)">▬ geçen yıl aynı ay</text>`;
+  svg.onpointermove=e=>{const g=e.target.closest(".mb"),tip=$("tip2");if(!g){tip.style.display="none";return;}const i=+g.dataset.i,r=svg.getBoundingClientRect();
+    tip.style.display="block";tip.style.left=Math.max(60,Math.min(r.width-60,(L+i*bw+bw/2)*r.width/W))+"px";tip.style.top=(Y(E.months[i][1])*r.height/H)+"px";
+    tip.textContent=`${E.months[i][0]} ${E.year}: ${fmt(E.months[i][1],1)} · önceki yıl: ${fmt(E.prev[i],1)}`;};
+  svg.onpointerleave=()=>{$("tip2").style.display="none";};
+}
+
+/* ---------- CEPHELER ---------- */
+function renderFronts(){
+  const F=D.fronts;if(!F){$("fronts").innerHTML='<div class="state">Cephe verisi yüklenemedi.</div>';return;}
+  $("frontnote").textContent=F.note+" Karşılaştırma bir önceki 7 güne göre.";
+  const fmax=Math.max(1,...F.fronts.map(f=>f.count));
+  $("fronts").innerHTML=F.fronts.map((f,i)=>{const d=f.count-f.prev,pc=f.prev?Math.round(d/f.prev*100):null;const last=f.events[0];
+    return `<button class="card front" data-f="${i}"><span class="n">${esc(f.name)}</span><span class="c">${f.count} olay ${pc===null?"":`<span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span>`}</span><div class="bar" role="img" aria-label="${f.count} olay"><i style="width:${(f.count/fmax*100).toFixed(1)}%"></i></div><span class="last">${last?esc(last.title):"Son 7 günde kayıt yok."}</span>${f.events.length?'<span class="more">Olayları gör →</span>':""}</button>`;}).join("");
+}
+function openFront(i){
+  const f=D.fronts.fronts[i],mx=Math.max(1,...f.daily.map(d=>d[1]));
+  f.events.forEach(s=>STORY_INDEX.set(s.id,s));
+  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">Cephe · son 7 gün</span><h3 id="sh-t">${esc(f.name)}</h3>
+  <div class="meta"><span class="num">${f.count} olay</span><span>· önceki hafta ${f.prev}</span></div>
+  <div class="mini" role="img" aria-label="Günlük: ${f.daily.map(d=>d[1]).join(", ")}">${f.daily.map(([d,v])=>`<i title="${dlabel(d)}: ${v}" style="height:${(v/mx*100).toFixed(0)}%"></i>`).join("")}</div>
+  <div class="minil">${f.daily.map(([d])=>`<span>${+d.slice(8)}</span>`).join("")}</div>
+  <div class="cat" style="margin-top:6px">Son olaylar</div>
+  <div>${f.events.map(e=>`<div class="ev"><span class="tm">${trDate(e.first)}<br>${trTime(e.first)}</span><div><span class="ty">${catLabel(e.cat)} · ${e.n} kaynak</span><div class="pl">${esc(e.title)}</div>${e.summary?`<p>${esc(e.summary.slice(0,220))}${e.summary.length>220?"…":""}</p>`:""}${mediaBlock(e)}<a href="${esc(safeUrl(e.sources[0]?.url))}" target="_blank" rel="noopener">${esc(e.sources[0]?.name||"Kaynak")} ↗</a>${e.n>1?` · <a href="#" class="story" data-id="${esc(e.id)}" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--accent)">tüm kaynaklar</a>`:""}</div></div>`).join("")||'<p class="sub">Kayıt yok.</p>'}</div>`;
+  $("sheet").classList.add("on");$("cls").focus();
+}
+$("fronts").addEventListener("click",e=>{const b=e.target.closest(".front");if(b)openFront(+b.dataset.f);});
+
+/* ---------- SAVUNMA ---------- */
+function renderDef(){
+  const list=(D.news?.stories||[]).filter(s=>s.cat==="def").slice(0,15);
+  $("defstories").innerHTML=list.map((s,i)=>storyCard(s,{thumb:i<2})).join("")||'<div class="card sub">Son 36 saatte savunma sanayii haberi yok.</div>';
+  renderExp();
+}
+function renderExp(){
+  const X=D.manual?.defense_exports;if(!X)return;const data=X.years;
+  const svg=$("expchart"),W=svg.clientWidth||440,H=170,L=30,B=22,T=16,mx=Math.ceil(Math.max(...data.map(d=>d[1]))/5)*5;
+  const bw=(W-L-10)/data.length;svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.innerHTML=[0,mx/2,mx].map(t=>{const y=T+(1-t/mx)*(H-T-B);return `<line x1="${L}" x2="${W-10}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${t}</text>`;}).join("")+
+  data.map(([yr,v],i)=>{const x=L+i*bw+bw*.2,w=bw*.6,y=T+(1-v/mx)*(H-T-B);return `<g><title>${yr}: ${fmt(v,2)} milyar $</title><path d="M${x},${H-B}V${y+4}a4,4 0 0 1 4,-4h${w-8}a4,4 0 0 1 4,4V${H-B}Z" fill="var(--series)"/><text x="${x+w/2}" y="${H-6}" text-anchor="middle" font-size="10.5" font-family="JetBrains Mono,monospace" fill="var(--muted)">${yr}</text>${i===data.length-1?`<text x="${x+w/2}" y="${y-5}" text-anchor="middle" font-size="11" font-family="JetBrains Mono,monospace" fill="var(--ink)">${fmt(v,2)}</text>`:""}</g>`;}).join("");
+}
+
+/* ---------- ERDOĞAN ---------- */
+function renderRte(){
+  const R=D.rte;if(!R){$("agenda").innerHTML='<div class="state">Veri yüklenemedi.</div>';return;}
+  $("rtebrief").innerHTML=R.brief.map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Son 30 saatte haber yok.</li>";
+  R.did.forEach(s=>STORY_INDEX.set(s.id,s));
+  $("agenda").innerHTML=R.did.map(c=>`<div class="story" data-id="${esc(c.id)}" style="cursor:pointer"><span class="h">${trTime(c.first)}</span><span>${esc(c.title)}<div class="w">${esc(c.sources.map(s=>s.name).slice(0,3).join(", "))}</div></span></div>`).join("")||'<p class="sub" style="margin:0">Son 30 saatte program haberi yok.</p>';
+  $("said").innerHTML=R.said.map(g=>`<div class="card said"><span class="topic">${esc(g.topic)}</span>${g.items.map(c=>{STORY_INDEX.set(c.id,c);return `<div style="display:flex;flex-direction:column;gap:3px;padding:6px 0;border-top:1px solid var(--line)"><h4>${esc(c.title)}</h4>${c.summary?`<span style="font-size:14px;color:var(--muted)">${esc(c.summary.slice(0,200))}${c.summary.length>200?"…":""}</span>`:""}<a href="#" class="story" data-id="${esc(c.id)}" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--series)">${c.n} kaynak · ${trTime(c.first)} ↗</a></div>`;}).join("")}</div>`).join("")||'<div class="card sub">Son 30 saatte açıklama haberi yok.</div>';
+}
+
+/* ---------- GEZİNME & YÜKLEME ---------- */
+const VIEWS=["feed","data","front","def","rte"];
+function show(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
+  $("main").scrollTop=0;
+  if(v==="data"){renderKpis();renderChart();renderMexp();}
+  if(v==="front")renderFronts();
+  if(v==="def")renderDef();
+  if(v==="rte")renderRte();
+  try{history.replaceState(null,"","#"+v);}catch(e){}
+}
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)show(b.dataset.v);});
+window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(VIEWS.includes(v))show(v);});
+window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
+
+async function getJSON(name){try{const r=await fetch(DATA_BASE+name+"?t="+Math.floor(Date.now()/60000),{cache:"no-store"});if(!r.ok)throw 0;return await r.json();}catch(e){return null;}}
+async function load(){
+  const [news,markets,fronts,rte,manual,meta]=await Promise.all(["news.json","markets.json","fronts.json","rte.json","manual.json","meta.json"].map(getJSON));
+  D={news,markets,fronts,rte,manual,meta};
+  if(meta){const ok=Object.values(meta.sources||{}).filter(n=>n>0).length;$("upd").textContent=`${trTime(meta.updated)} · ${ok} kaynak`;}
+  renderFeed();renderManual();
+  const h=location.hash.slice(1);show(VIEWS.includes(h)?h:"feed");
+}
+load();
+setInterval(load,10*60*1000);
+</script>
+</body>
+</html>

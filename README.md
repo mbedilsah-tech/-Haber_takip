@@ -38,11 +38,21 @@ GitHub Actions (her 30 dk)  ──►  collector/ (Python)
 - Actions dakikaları özel repolarda ayda 2.000 ile sınırlı. 30 dakikada bir çalışmak bu sınırı aşabilir.
 - **Öneri:** Kod ve haber verisi herkese açık olsun, gizli bilgiler Secrets'ta kalsın. Tamamen ücretsiz kalmanın en kolay yolu bu.
 
+## Klasörler
+| Klasör | Ne var |
+|---|---|
+| `app/` | Uygulamanın kendisi (tek HTML dosyası). Verileri `data/` klasöründen okur. |
+| `collector/` | Toplayıcı: `collect.py` ve kaynak listesi `sources.json`. Kaynak eklemek için sadece bu JSON'u düzenlemek yeterli. |
+| `data/manual.json` | Elle güncellenen veriler: makro göstergeler, ihracat, takvimler. |
+| `.github/workflows/collect.yml` | Her 30 dakikada toplayıp GitHub Pages'e yayınlayan iş akışı. |
+| `prototype/` | İlk tıklanabilir prototip (örnek veri). |
+
 ## Yol haritası
 1. [x] Tıklanabilir prototip
-2. [ ] Toplayıcı: RSS + Telegram → `data/news.json`, sınıflama ve birleştirme
-3. [ ] Veri: TCMB EVDS → `data/markets.json`, `data/macro.json`
-4. [ ] Arayüzü gerçek veriye bağlama (GitHub Pages)
+2. [x] Toplayıcı: RSS + Google Haberler + Telegram → `news.json`, sınıflama ve birleştirme
+3. [x] Piyasa verisi (kur, altın, ONS, gümüş, BIST, Brent) → `markets.json`
+3b. [ ] Makro ve ihracat verisini otomatik çekme (TCMB EVDS, TİM)
+4. [x] Arayüzü gerçek veriye bağlama (GitHub Pages)
 5. [ ] Capacitor ile Android APK, Actions'ta otomatik derleme
 6. [ ] Cepheler (ACLED) ve savunma takvimi
 7. [ ] Bildirim: önemli gelişmede telefona uyarı

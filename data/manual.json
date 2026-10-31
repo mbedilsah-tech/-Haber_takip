@@ -1,0 +1,36 @@
+{
+  "_not": "Bu dosya elle güncellenir. \"ornek\": true olan bölümler uygulamada 'örnek veri' etiketiyle görünür. Gerçek değer girildiğinde false yapın.",
+  "macro": {
+    "ornek": true,
+    "rows": [
+      ["Yıllık enflasyon (TÜFE)", "%31,4", "Eylül 2026", "3 Kas"],
+      ["Politika faizi", "%34,00", "Ekim 2026 PPK", "11 Ara"],
+      ["İşsizlik oranı", "%8,6", "Ağustos 2026", "10 Kas"],
+      ["Cari denge (12 ay)", "−11,2 mlr $", "Ağustos 2026", "12 Kas"],
+      ["Büyüme (GSYH, yıllık)", "%3,1", "2026 2. çeyrek", "1 Ara"]
+    ]
+  },
+  "calendar": {
+    "ornek": true,
+    "items": [["3 Kas", "TÜİK Ekim enflasyonu"], ["10 Kas", "İşsizlik verisi (Eylül)"], ["12 Kas", "Cari işlemler dengesi (Eylül)"], ["11 Ara", "TCMB faiz kararı"]]
+  },
+  "exports": {
+    "ornek": true,
+    "source": "Ticaret Bakanlığı / TİM",
+    "year": 2026,
+    "target": 280,
+    "months": [["Oca", 21.2], ["Şub", 22.0], ["Mar", 23.9], ["Nis", 21.0], ["May", 24.3], ["Haz", 20.8], ["Tem", 25.0], ["Ağu", 21.9], ["Eyl", 23.4], ["Eki", 24.6]],
+    "prev": [19.8, 20.8, 23.4, 20.9, 24.1, 19.0, 22.5, 21.8, 22.6, 24.0],
+    "sectors": [["Otomotiv", 34.1, 6.2], ["Kimya", 29.0, 3.1], ["Elektrik-elektronik", 17.2, 9.8], ["Hazır giyim", 15.4, -4.5], ["Demir-çelik", 13.9, -1.2]],
+    "countries": [["Almanya", 17.6, 4.0], ["ABD", 13.1, 7.3], ["Birleşik Krallık", 11.8, 2.2], ["Irak", 11.0, 8.9], ["İtalya", 10.2, 1.5]]
+  },
+  "defense_exports": {
+    "ornek": false,
+    "source": "SSB yıllık açıklamaları",
+    "years": [[2020, 2.28], [2021, 3.22], [2022, 4.40], [2023, 5.50], [2024, 7.15]]
+  },
+  "defense_calendar": {
+    "ornek": true,
+    "items": [["4 Kas", "KAAN prototipi yer testleri (planlanan)"], ["12 Kas", "Roketsan test atışı penceresi (NOTAM)"], ["Ara", "Altay tankı seri üretim teslimatı (beklenen)"]]
+  }
+}

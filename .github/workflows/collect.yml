@@ -1,0 +1,58 @@
+name: Haberleri topla ve yayınla
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # her 30 dakikada bir (GitHub yoğunken birkaç dakika gecikebilir)
+  workflow_dispatch:          # Actions sekmesinden elle çalıştırma
+  push:
+    branches: [main]
+    paths: ["app/**", "collector/**", "data/manual.json", ".github/workflows/collect.yml"]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests beautifulsoup4
+      - name: Önceki haber deposunu geri yükle
+        uses: actions/cache/restore@v4
+        with:
+          path: .cache
+          key: store-${{ github.run_id }}
+          restore-keys: store-
+      - name: Topla
+        run: python collector/collect.py --out site/data --store .cache/store.json
+      - name: Uygulamayı ekle
+        run: cp -r app/. site/
+      - name: Haber deposunu sakla
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .cache
+          key: store-${{ github.run_id }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.d.outputs.page_url }}
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v4
