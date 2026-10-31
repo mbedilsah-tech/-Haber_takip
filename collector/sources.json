@@ -2,22 +2,6 @@
   "_not": "Kaynak listesi. Çalışmayan kaynak toplayıcıyı durdurmaz, data/meta.json içinde hata olarak görünür.",
   "rss": [
     {
-      "name": "AA Güncel",
-      "url": "https://www.aa.com.tr/tr/rss/default?cat=guncel"
-    },
-    {
-      "name": "AA Dünya",
-      "url": "https://www.aa.com.tr/tr/rss/default?cat=dunya"
-    },
-    {
-      "name": "AA Ekonomi",
-      "url": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi"
-    },
-    {
-      "name": "AA Politika",
-      "url": "https://www.aa.com.tr/tr/rss/default?cat=politika"
-    },
-    {
       "name": "BBC Türkçe",
       "url": "https://feeds.bbci.co.uk/turkce/rss.xml"
     },
@@ -43,6 +27,9 @@
     }
   ],
   "gnews": [
+    {
+      "q": "site:aa.com.tr when:1d"
+    },
     {
       "q": "Suriye when:1d"
     },
@@ -241,7 +228,11 @@
       "fighter jet",
       "F-35",
       "F-16",
-      "Eurofighter"
+      "Eurofighter",
+      "savunma sanayi",
+      "İHA",
+      "SİHA",
+      "füze sistemi"
     ],
     "eco": [
       "TCMB",
