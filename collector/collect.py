@@ -68,6 +68,9 @@ def compile_kws(kws: list[str]):
     out = []
     for k in kws:
         kl = trlower(k)
+        if kl.startswith("="):
+            out.append(("exact", kl[1:]))
+            continue
         out.append(("phrase", kl) if " " in kl else ("exact" if len(kl) <= 3 else "prefix", kl))
     return out
 
@@ -116,10 +119,17 @@ def item_id(link: str, title: str) -> str:
 
 
 # ---------------------------------------------------------------- kaynak okuyucular
-def fetch(url: str, timeout: int = 25) -> bytes:
-    r = requests.get(url, headers=UA, timeout=timeout)
-    r.raise_for_status()
-    return r.content
+def fetch(url: str, timeout: int = 25, tries: int = 3) -> bytes:
+    for n in range(tries):
+        try:
+            r = requests.get(url, headers=UA, timeout=timeout)
+            r.raise_for_status()
+            return r.content
+        except (requests.ConnectionError, requests.Timeout) as e:
+            if n == tries - 1:
+                raise
+            time.sleep(3 * (n + 1))
+    raise RuntimeError("unreachable")
 
 
 def _local(tag: str) -> str:
@@ -262,7 +272,8 @@ def annotate(it: dict) -> dict:
     tl, tk = trlower(text), tokens(text)
     title_tk = tokens(it["title"])
     it["_excluded"] = kw_hits(trlower(it["title"]), title_tk, EXCLUDE) > 0
-    scores = {c: kw_hits(tl, tk, kws) for c, kws in CAT_KWS.items()}
+    ttl = trlower(it["title"])
+    scores = {c: 2 * kw_hits(ttl, title_tk, kws) + kw_hits(tl, tk, kws) for c, kws in CAT_KWS.items()}
     it["_cats"] = scores
     it["_fronts"] = [f for f, kws in FRONT_KWS.items() if kw_hits(tl, tk, kws)]
     it["_sig"] = stems(it["title"])
@@ -307,10 +318,12 @@ CAT_ORDER = ["war", "def", "eco", "pol", "geo"]
 
 def finish(c: dict) -> dict:
     its = c["items"]
-    total = Counter()
-    for i in its:
-        total.update(i["_cats"])
-    cat = max(CAT_ORDER, key=lambda k: (total[k], -CAT_ORDER.index(k))) if any(total.values()) else "gen"
+    votes = Counter()
+    for i in its:  # her haber en yüksek puanlı kategorisine bir oy verir
+        sc = i["_cats"]
+        if any(sc.values()):
+            votes[max(CAT_ORDER, key=lambda k: (sc[k], -CAT_ORDER.index(k)))] += 1
+    cat = max(CAT_ORDER, key=lambda k: (votes[k], -CAT_ORDER.index(k))) if votes else "gen"
     fronts = Counter(f for i in its for f in i["_fronts"])
     rep = max(its, key=lambda i: (i["official"], i["kind"] == "rss" and i["via"] != "Google Haberler", len(i["desc"])))
     srcs, seen = [], set()

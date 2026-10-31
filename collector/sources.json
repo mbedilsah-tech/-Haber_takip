@@ -140,7 +140,10 @@
       "DEAŞ",
       "PKK",
       "YPG",
-      "SDG"
+      "SDG",
+      "Patriot",
+      "şehit",
+      "silahlı"
     ],
     "geo": [
       "Trump",
@@ -166,7 +169,20 @@
       "Şara",
       "Şeybani",
       "Türk dünyası",
-      "Türk Devletleri"
+      "Türk Devletleri",
+      "barış",
+      "peace",
+      "Zelenski",
+      "Zelenskiy",
+      "Erakçi",
+      "Rubio",
+      "Lavrov",
+      "Guterres",
+      "Hamaney",
+      "ittifak",
+      "anlaşma",
+      "Genel Sekreter",
+      "Dışişleri Bakanı"
     ],
     "pol": [
       "TBMM",
@@ -189,7 +205,13 @@
       "tutuklandı",
       "soruşturma",
       "İçişleri",
-      "Adalet Bakanı"
+      "Adalet Bakanı",
+      "Kılıçdaroğlu",
+      "YENİ Parti",
+      "Resmi Gazete",
+      "atama",
+      "il başkanı",
+      "teşkilat"
     ],
     "def": [
       "Baykar",
@@ -246,7 +268,14 @@
       "doğalgaz",
       "economy",
       "inflation",
-      "oil"
+      "oil",
+      "maaş",
+      "emekli",
+      "memur",
+      "zam",
+      "Ticaret Bakanlığı",
+      "ekonomist",
+      "TL"
     ]
   },
   "exclude": [
@@ -264,7 +293,12 @@
     "hava durumu",
     "konser",
     "playoff",
-    "NBA"
+    "NBA",
+    "gece kulübü",
+    "nikah",
+    "düğün",
+    "astroloji",
+    "yaşam"
   ],
   "fronts": {
     "Ukrayna–Rusya": [
@@ -286,12 +320,13 @@
       "Gazze",
       "Gaza",
       "Hamas",
-      "Refah",
       "Rafah",
       "Han Yunus",
       "Khan Younis",
       "Batı Şeria",
-      "West Bank"
+      "West Bank",
+      "Refah sınır",
+      "Refah kapısı"
     ],
     "Suriye": [
       "Suriye",
@@ -321,11 +356,11 @@
       "Yemen",
       "Husi",
       "Houthi",
-      "Sana",
       "Taiz",
       "Hudeyde",
       "Kızıldeniz",
-      "Red Sea"
+      "Red Sea",
+      "=Sana"
     ],
     "Sudan": [
       "Sudan",
@@ -337,12 +372,14 @@
       "Darfur"
     ],
     "Sahel": [
-      "Mali",
       "Burkina",
-      "Nijer",
-      "Niger",
       "Sahel",
-      "JNIM"
+      "JNIM",
+      "=Mali",
+      "=Malide",
+      "Malili",
+      "=Nijer",
+      "=Niger"
     ],
     "İran": [
       "İran",
@@ -354,12 +391,16 @@
       "Galibaf"
     ],
     "Irak": [
-      "Irak",
       "Iraq",
       "Bağdat",
       "Baghdad",
       "Erbil",
-      "Kerkük"
+      "Kerkük",
+      "=Irak",
+      "Iraklı",
+      "Irakta",
+      "Irakın",
+      "Irakın"
     ]
   },
   "rte_topics": {
