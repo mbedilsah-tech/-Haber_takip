@@ -11,7 +11,8 @@ Savaşlar, jeopolitik, iç siyaset, savunma sanayii ve Türkiye ekonomisi için 
 | **Savunma** | Savunma sanayii gündemi, test ve teslimat takvimi, ihracat verisi. |
 | **Erdoğan** | Cumhurbaşkanı'nın günlük programı, günün özeti ve konuşmalarının konu konu özeti (kaynak linkleriyle). |
 
-Prototip: [`prototype/index.html`](prototype/index.html). Bu sürümde haberler gerçek, sayılar örnek veridir.
+**Canlı uygulama:** https://mbedilsah-tech.github.io/-Haber_takip/  
+**Android APK:** [son sürüm](https://github.com/mbedilsah-tech/-Haber_takip/releases/latest)
 
 ## Ücretsiz mimari
 ```
@@ -45,6 +46,7 @@ GitHub Actions (her 30 dk)  ──►  collector/ (Python)
 | `collector/` | Toplayıcı: `collect.py` ve kaynak listesi `sources.json`. Kaynak eklemek için sadece bu JSON'u düzenlemek yeterli. |
 | `data/manual.json` | Elle güncellenen veriler: makro göstergeler, ihracat, takvimler. |
 | `.github/workflows/collect.yml` | Her 30 dakikada toplayıp GitHub Pages'e yayınlayan iş akışı. |
+| `android-app/` | APK ayarları, ikonlar ve imza dosyası. APK `.github/workflows/android.yml` ile derlenir. |
 | `prototype/` | İlk tıklanabilir prototip (örnek veri). |
 
 ## Yol haritası
@@ -53,6 +55,6 @@ GitHub Actions (her 30 dk)  ──►  collector/ (Python)
 3. [x] Piyasa verisi (kur, altın, ONS, gümüş, BIST, Brent) → `markets.json`
 3b. [ ] Makro ve ihracat verisini otomatik çekme (TCMB EVDS, TİM)
 4. [x] Arayüzü gerçek veriye bağlama (GitHub Pages)
-5. [ ] Capacitor ile Android APK, Actions'ta otomatik derleme
+5. [x] Capacitor ile Android APK, Actions'ta otomatik derleme → [Releases](https://github.com/mbedilsah-tech/-Haber_takip/releases/latest)
 6. [ ] Cepheler (ACLED) ve savunma takvimi
 7. [ ] Bildirim: önemli gelişmede telefona uyarı
