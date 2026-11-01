@@ -4,7 +4,7 @@ on:
   workflow_dispatch:          # Actions sekmesinden elle
   push:
     branches: [main]
-    paths: ["app/**", "android-app/**", ".github/workflows/android.yml"]
+    paths: ["android-app/**", ".github/workflows/android.yml"]   # app/ değişince APK gerekmez: ekranlar canlı siteden yüklenir
 
 permissions:
   contents: write             # Releases'e APK yüklemek için
@@ -38,9 +38,9 @@ jobs:
 
       - name: Web dosyalarını hazırla
         run: |
-          rm -rf www && mkdir www && cp -r ../app/. www/
-          # APK veriyi canlı siteden çeker
-          sed -i "s#<script>#<script>window.HT_DATA_BASE=\"${DATA_BASE}\";</script><script>#" www/index.html
+          # Uygulama ekranları canlı siteden yüklenir (capacitor.config.json → server.url).
+          # www/ içinde sadece bağlantı yokken gösterilen sayfa durur.
+          rm -rf www && mkdir www && cp offline.html www/index.html && cp offline.html www/offline.html
 
       - name: Android projesini oluştur
         run: |

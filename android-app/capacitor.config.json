@@ -2,6 +2,10 @@
   "appId": "com.mbedilsah.habertakip",
   "appName": "Haber Takip",
   "webDir": "www",
+  "server": {
+    "url": "https://mbedilsah-tech.github.io/-Haber_takip/",
+    "errorPath": "offline.html"
+  },
   "android": {
     "adjustMarginsForEdgeToEdge": "auto",
     "backgroundColor": "#0b121c"
