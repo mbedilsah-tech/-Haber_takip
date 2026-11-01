@@ -362,7 +362,7 @@ def public(c: dict) -> dict:
 
 
 # ---------------------------------------------------------------- özet ve görsel (haberin asıl sayfasından)
-ENRICH_BUDGET = 90          # her çalıştırmada en fazla bu kadar yeni sayfa açılır
+ENRICH_BUDGET = 220         # her çalıştırmada en fazla bu kadar yeni sayfa açılır
 ENRICH: dict[str, dict] = {}
 ENRICH_STATS = Counter()
 
