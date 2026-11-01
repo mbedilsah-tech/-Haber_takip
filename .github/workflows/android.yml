@@ -1,0 +1,72 @@
+name: Android APK derle
+
+on:
+  workflow_dispatch:          # Actions sekmesinden elle
+  push:
+    branches: [main]
+    paths: ["app/**", "android-app/**", ".github/workflows/android.yml"]
+
+permissions:
+  contents: write             # Releases'e APK yüklemek için
+
+concurrency:
+  group: apk
+  cancel-in-progress: true
+
+env:
+  DATA_BASE: https://mbedilsah-tech.github.io/-Haber_takip/data/
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: android-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Bağımlılıklar
+        run: npm install --no-audit --no-fund
+
+      - name: Web dosyalarını hazırla
+        run: |
+          rm -rf www && mkdir www && cp -r ../app/. www/
+          # APK veriyi canlı siteden çeker
+          sed -i "s#<script>#<script>window.HT_DATA_BASE=\"${DATA_BASE}\";</script><script>#" www/index.html
+
+      - name: Android projesini oluştur
+        run: |
+          npx cap add android
+          npx @capacitor/assets generate --android --assetPath assets --iconBackgroundColor '#0e1622' --iconBackgroundColorDark '#0e1622' --splashBackgroundColor '#0b121c' --splashBackgroundColorDark '#0b121c' || echo "ikon üretilemedi, varsayılan ikon kullanılacak"
+          npx cap sync android
+
+      - name: APK derle
+        run: |
+          # Her derlemede aynı imza: telefondaki uygulama silinmeden güncellenebilsin
+          mkdir -p ~/.android && cp debug.keystore ~/.android/debug.keystore
+          cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon -q
+          cp app/build/outputs/apk/debug/app-debug.apk ../HaberTakip.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HaberTakip-apk
+          path: android-app/HaberTakip.apk
+
+      - name: Releases'e yükle
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Haber Takip ${{ github.run_number }}
+          body: |
+            Telefona kurulum: bu sayfadan **HaberTakip.apk** dosyasını indir ve aç.
+            İlk kurulumda "Bilinmeyen kaynaklardan yükleme" izni istenebilir.
+          files: android-app/HaberTakip.apk
+          make_latest: true

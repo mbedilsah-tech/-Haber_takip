@@ -1,0 +1,9 @@
+{
+  "appId": "com.mbedilsah.habertakip",
+  "appName": "Haber Takip",
+  "webDir": "www",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "auto",
+    "backgroundColor": "#0b121c"
+  }
+}
