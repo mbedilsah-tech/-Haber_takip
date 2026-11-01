@@ -337,7 +337,8 @@ def finish(c: dict) -> dict:
     if not media:
         media = next(((None, i["media"], i["url"]) for i in its if i.get("media")), None)
     n = len(srcs)
-    return {
+    urls = [i["url"] for i in sorted(its, key=lambda i: (i["via"] == "Google Haberler", i["kind"] == "telegram")) if i["url"]]
+    return {"_urls": urls[:6],
         "id": rep["id"], "title": rep["title"], "summary": rep["desc"][:420] if rep["desc"] != rep["title"] else "",
         "cat": cat, "fronts": [f for f, _ in fronts.most_common(2)], "n": n,
         "first": times[0], "last": times[-1], "sources": srcs[:10],
@@ -358,6 +359,129 @@ def rank(c: dict) -> float:
 
 def public(c: dict) -> dict:
     return {k: v for k, v in c.items() if not k.startswith("_")}
+
+
+# ---------------------------------------------------------------- özet ve görsel (haberin asıl sayfasından)
+ENRICH_BUDGET = 90          # her çalıştırmada en fazla bu kadar yeni sayfa açılır
+ENRICH: dict[str, dict] = {}
+ENRICH_STATS = Counter()
+
+
+def gn_decode(url: str) -> str | None:
+    """Google Haberler yönlendirme linkini asıl haber adresine çevirir."""
+    try:
+        from googlenewsdecoder import gnewsdecoder  # varsa hazır kütüphane
+        r = gnewsdecoder(url)
+        if r.get("status") and r.get("decoded_url"):
+            return r["decoded_url"]
+    except Exception:
+        pass
+    try:  # yedek: aynı yöntemin elle uygulanışı
+        aid = urllib.parse.urlparse(url).path.rstrip("/").split("/")[-1]
+        page = BeautifulSoup(fetch(f"https://news.google.com/rss/articles/{aid}", timeout=15, tries=1), "html.parser")
+        el = page.select_one("[data-n-a-sg][data-n-a-ts]")
+        if not el:
+            return None
+        req = ["Fbv4je", '["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],'
+               '"X","X",1,[1,1,1],1,1,null,0,0,null,0],"%s",%s,"%s"]' % (aid, el["data-n-a-ts"], el["data-n-a-sg"])]
+        r = requests.post("https://news.google.com/_/DotsSplashUi/data/batchexecute",
+                          headers={**UA, "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+                          data="f.req=" + urllib.parse.quote(json.dumps([[req]])), timeout=15)
+        body = json.loads(r.text.split("\n\n")[1])[:-2]
+        return json.loads(body[0][2])[1]
+    except Exception:
+        return None
+
+
+def trim_summary(text: str, title: str, limit: int = 320) -> str:
+    text = re.sub(r"\s+", " ", html.unescape(text or "")).strip()
+    if trlower(text).startswith(trlower(title)[:40]):
+        text = text[len(title):].lstrip(" .:-–—|")
+    if len(text) <= limit:
+        return text
+    cut = text[:limit]
+    end = max(cut.rfind(". "), cut.rfind("! "), cut.rfind("? "))
+    return cut[:end + 1] if end > 120 else cut.rsplit(" ", 1)[0] + "…"
+
+
+def page_meta(url: str) -> dict:
+    r = requests.get(url, headers={**UA, "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36"},
+                     timeout=12, stream=True)
+    r.raise_for_status()
+    raw = r.raw.read(1_500_000, decode_content=True)
+    soup = BeautifulSoup(raw, "html.parser")
+
+    def meta(*names):
+        for n in names:
+            el = soup.find("meta", attrs={"property": n}) or soup.find("meta", attrs={"name": n})
+            if el and el.get("content", "").strip():
+                return el["content"].strip()
+        return ""
+
+    desc = meta("og:description", "twitter:description", "description")
+    if len(desc) < 60:
+        body = soup.find("article") or soup.find("main") or soup
+        for p in body.find_all("p"):
+            t = p.get_text(" ", strip=True)
+            if len(t) > 80:
+                desc = t
+                break
+    img = meta("og:image", "og:image:url", "twitter:image", "twitter:image:src")
+    if img:
+        img = urllib.parse.urljoin(r.url, img)
+    return {"desc": desc, "img": img, "final": r.url}
+
+
+def enrich_one(url: str) -> dict:
+    real = gn_decode(url) if "news.google.com" in url else url
+    if not real:
+        return {"fail": "decode"}
+    m = page_meta(real)
+    return {"desc": m["desc"], "img": m["img"], "final": m["final"]}
+
+
+def enrich(clusters: list[dict]) -> None:
+    need = [c for c in clusters if len(c["summary"]) < 60 or not c["img"]]
+    todo: list[str] = []
+    for c in need:
+        for u in c["_urls"][:2]:
+            if u not in ENRICH and u not in todo and len(todo) < ENRICH_BUDGET:
+                todo.append(u)
+    def work(u):
+        try:
+            return u, enrich_one(u)
+        except Exception as e:
+            return u, {"fail": type(e).__name__}
+    with cf.ThreadPoolExecutor(max_workers=8) as ex:
+        for u, res in ex.map(work, todo):
+            res["ts"] = iso(NOW)
+            ENRICH[u] = res
+            ENRICH_STATS["fail" if "fail" in res else "ok"] += 1
+    for c in need:
+        for u in c["_urls"][:2]:
+            r = ENRICH.get(u)
+            if not r or "fail" in r:
+                continue
+            if len(c["summary"]) < 60 and r.get("desc"):
+                summ = trim_summary(r["desc"], c["title"])
+                if len(summ) >= 40:
+                    c["summary"] = summ
+            if not c["img"] and r.get("img") and not r["img"].endswith((".svg", ".gif")):
+                c["img"], c["media"], c["media_url"] = r["img"], c["media"] or "foto", r.get("final") or u
+            if c["summary"] and c["img"]:
+                break
+    ENRICH_STATS["with_summary"] = sum(1 for c in clusters if len(c["summary"]) >= 40)
+    ENRICH_STATS["with_img"] = sum(1 for c in clusters if c["img"])
+    ENRICH_STATS["total"] = len(clusters)
+
+
+def load_enrich(path: Path) -> None:
+    try:
+        cutoff = NOW - dt.timedelta(days=STORE_DAYS)
+        ENRICH.update({k: v for k, v in json.loads(path.read_text(encoding="utf-8")).items()
+                       if parse_date(v.get("ts")) and parse_date(v["ts"]) >= cutoff})
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
 
 
 # ---------------------------------------------------------------- çıktılar
@@ -475,6 +599,18 @@ def main() -> int:
     store_path.write_text(json.dumps([{k: v for k, v in i.items() if not k.startswith("_")} for i in items],
                                      ensure_ascii=False), encoding="utf-8")
     clusters = cluster([annotate(dict(i)) for i in items])
+
+    # Uygulamada görünecek kümelere özet ve görsel ekle (önce en önemliler)
+    enrich_path = store_path.with_name("enrich.json")
+    load_enrich(enrich_path)
+    shown = sorted([c for c in clusters if hours_ago(c["last"]) <= FEED_HOURS], key=rank, reverse=True)[:160]
+    shown_ids = {id(c) for c in shown}
+    extra = [c for c in clusters if id(c) not in shown_ids and hours_ago(c["last"]) <= 7 * 24
+             and (c["fronts"] or c["rte"])]
+    extra.sort(key=lambda c: c["last"], reverse=True)
+    enrich(shown + extra[:120])
+    enrich_path.write_text(json.dumps(ENRICH, ensure_ascii=False), encoding="utf-8")
+    META["enrich"] = dict(ENRICH_STATS)
 
     news = build_news(clusters)
     write(out, "news.json", news)

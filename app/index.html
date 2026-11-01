@@ -152,7 +152,12 @@ nav button[aria-selected="true"]{color:var(--accent);font-weight:600}
 a.media{position:relative;overflow:hidden;background:var(--line)}
 a.media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 a.media b,a.media span{position:relative;color:#fff}
-.story .thumb{width:100%;height:150px;object-fit:cover;border-radius:6px;background:var(--line)}
+.story .thumb{width:100%;height:170px;object-fit:cover;border-radius:6px;background:var(--line)}
+.story .row{display:grid;grid-template-columns:1fr 92px;gap:12px;align-items:start}
+.story .row.noimg{grid-template-columns:1fr}
+.story .sq{width:92px;height:92px;object-fit:cover;border-radius:6px;background:var(--line)}
+.story .txt{display:flex;flex-direction:column;gap:5px;min-width:0}
+.story p{-webkit-line-clamp:3!important;color:var(--ink)!important;opacity:.78}
 .badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
 .state{padding:40px 10px;text-align:center;color:var(--muted)}
 .srcs a .st{display:flex;gap:6px;align-items:center}
@@ -250,8 +255,12 @@ const STORY_INDEX=new Map();
 function tags(s){return (s.official?'<span class="tag o">Resmî</span>':"")+(s.unverified?'<span class="tag u">Doğrulanmadı</span>':"");}
 function storyCard(s,opts={}){
   STORY_INDEX.set(s.id,s);
-  const img=opts.thumb&&s.img?`<img class="thumb" src="${esc(safeUrl(s.img))}" alt="" loading="lazy" onerror="this.remove()">`:"";
-  return `<button class="card story" data-id="${esc(s.id)}">${img}<span class="cat">${catLabel(s.cat)}${s.fronts&&s.fronts.length?" · "+esc(s.fronts[0]):""}</span><h4>${esc(s.title)}</h4>${s.summary?`<p>${esc(s.summary)}</p>`:""}<div class="meta">${tags(s)}<span>${s.n} kaynak</span><span>· ${ago(s.last)}</span>${s.media==="video"?'<span>· ▶ video</span>':""}</div></button>`;
+  const img=s.img?esc(safeUrl(s.img)):"";
+  const head=`<span class="cat">${catLabel(s.cat)}${s.fronts&&s.fronts.length?" · "+esc(s.fronts[0]):""}</span><h4>${esc(s.title)}</h4>`;
+  const sum=s.summary?`<p>${esc(s.summary)}</p>`:"";
+  const meta=`<div class="meta">${tags(s)}<span>${s.n} kaynak</span><span>· ${ago(s.last)}</span>${s.media==="video"?'<span>· ▶ video</span>':""}</div>`;
+  if(opts.big&&img) return `<button class="card story" data-id="${esc(s.id)}"><img class="thumb" src="${img}" alt="" loading="lazy" onerror="this.remove()">${head}${sum}${meta}</button>`;
+  return `<button class="card story" data-id="${esc(s.id)}"><div class="row${img?"":" noimg"}"><div class="txt">${head}${sum}</div>${img?`<img class="sq" src="${img}" alt="" loading="lazy" onerror="this.parentNode.classList.add('noimg');this.remove()">`:""}</div>${meta}</button>`;
 }
 function mediaBlock(s){
   if(!s.img&&!s.media)return "";
@@ -275,7 +284,7 @@ function renderFeed(){
   const counts={};n.stories.forEach(s=>counts[s.cat]=(counts[s.cat]||0)+1);
   $("feedchips").innerHTML=CATS.filter(([k])=>k==="all"||counts[k]).map(([k,l])=>`<button class="chip" aria-pressed="${k===fcat}" data-k="${k}">${l}${k!=="all"?" "+counts[k]:""}</button>`).join("");
   const list=n.stories.filter(s=>fcat==="all"||s.cat===fcat);
-  $("stories").innerHTML=(list.slice(0,fshow).map((s,i)=>storyCard(s,{thumb:i<3})).join("")||'<div class="card sub">Bu başlıkta yeni haber yok.</div>')+(list.length>fshow?`<button class="more-btn" id="morebtn">Daha fazla göster (${list.length-fshow})</button>`:"");
+  $("stories").innerHTML=(list.slice(0,fshow).map((s,i)=>storyCard(s,{big:i===0})).join("")||'<div class="card sub">Bu başlıkta yeni haber yok.</div>')+(list.length>fshow?`<button class="more-btn" id="morebtn">Daha fazla göster (${list.length-fshow})</button>`:"");
 }
 $("feedchips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;fcat=b.dataset.k;fshow=30;renderFeed();});
 $("stories").addEventListener("click",e=>{if(e.target.id==="morebtn"){fshow+=30;renderFeed();}});
@@ -387,7 +396,7 @@ $("fronts").addEventListener("click",e=>{const b=e.target.closest(".front");if(b
 /* ---------- SAVUNMA ---------- */
 function renderDef(){
   const list=(D.news?.stories||[]).filter(s=>s.cat==="def").slice(0,15);
-  $("defstories").innerHTML=list.map((s,i)=>storyCard(s,{thumb:i<2})).join("")||'<div class="card sub">Son 36 saatte savunma sanayii haberi yok.</div>';
+  $("defstories").innerHTML=list.map((s,i)=>storyCard(s,{big:i===0})).join("")||'<div class="card sub">Son 36 saatte savunma sanayii haberi yok.</div>';
   renderExp();
 }
 function renderExp(){
