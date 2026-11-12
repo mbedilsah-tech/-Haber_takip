@@ -578,11 +578,12 @@ def build_fronts(clusters: list[dict]) -> dict:
         daily = Counter(parse_date(c["first"]).astimezone(TRT).date() for c in cs)
         cur = sum(daily[d] for d in days)
         prev = sum(daily[d - dt.timedelta(days=7)] for d in days)
-        latest = sorted([c for c in cs if hours_ago(c["last"]) <= 7 * 24], key=lambda c: c["last"], reverse=True)[:15]
+        latest = sorted([c for c in cs if hours_ago(c["last"]) <= 7 * 24], key=lambda c: c["first"], reverse=True)[:25]
         out.append({"name": f, "count": cur, "prev": prev,
                     "daily": [[d.isoformat(), daily[d]] for d in days],
                     "events": [public(c) for c in latest]})
-    out.sort(key=lambda x: x["count"], reverse=True)
+    # en son olay yaşanan cephe en üstte
+    out.sort(key=lambda x: (x["events"][0]["first"] if x["events"] else "", x["count"]), reverse=True)
     return {"updated": iso(NOW), "note": "Sayılar, bu cepheyle ilgili haberlerde geçen ayrı olay (haber kümesi) sayısıdır.", "fronts": out}
 
 

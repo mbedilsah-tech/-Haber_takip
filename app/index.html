@@ -167,6 +167,7 @@ a.media b,a.media span{position:relative;color:#fff}
 .rf svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .rf.busy svg{animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.dayh{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 0 4px;border-bottom:1px solid var(--line)}
 .more-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px;cursor:pointer;font-weight:500}
 </style>
 </head>
@@ -204,7 +205,7 @@ a.media b,a.media span{position:relative;color:#fff}
     </section>
 
     <section class="view" id="v-front" aria-label="Cepheler">
-      <h2>Cepheler · son 7 gün</h2>
+      <h2>Cepheler · en son olaya göre</h2>
       <div class="sub" id="frontnote"></div>
       <div id="fronts" style="display:flex;flex-direction:column;gap:10px"></div>
     </section>
@@ -387,7 +388,7 @@ function renderFronts(){
   $("frontnote").textContent=F.note+" Karşılaştırma bir önceki 7 güne göre.";
   const fmax=Math.max(1,...F.fronts.map(f=>f.count));
   $("fronts").innerHTML=F.fronts.map((f,i)=>{const d=f.count-f.prev,pc=f.prev?Math.round(d/f.prev*100):null;const last=f.events[0];
-    return `<button class="card front" data-f="${i}"><span class="n">${esc(f.name)}</span><span class="c">${f.count} olay ${pc===null?"":`<span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span>`}</span><div class="bar" role="img" aria-label="${f.count} olay"><i style="width:${(f.count/fmax*100).toFixed(1)}%"></i></div><span class="last">${last?esc(last.title):"Son 7 günde kayıt yok."}</span>${f.events.length?'<span class="more">Olayları gör →</span>':""}</button>`;}).join("");
+    return `<button class="card front" data-f="${i}"><span class="n">${esc(f.name)}</span><span class="c">${f.count} olay ${pc===null?"":`<span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span>`}</span><div class="bar" role="img" aria-label="${f.count} olay"><i style="width:${(f.count/fmax*100).toFixed(1)}%"></i></div><span class="last">${last?`<b style="color:var(--accent);font-family:var(--mono);font-size:12px">${ago(last.first)}</b> · ${esc(last.title)}`:"Son 7 günde kayıt yok."}</span>${f.events.length?'<span class="more">Olayları gör →</span>':""}</button>`;}).join("");
 }
 function openFront(i){
   const f=D.fronts.fronts[i],mx=Math.max(1,...f.daily.map(d=>d[1]));
@@ -397,7 +398,8 @@ function openFront(i){
   <div class="mini" role="img" aria-label="Günlük: ${f.daily.map(d=>d[1]).join(", ")}">${f.daily.map(([d,v])=>`<i title="${dlabel(d)}: ${v}" style="height:${(v/mx*100).toFixed(0)}%"></i>`).join("")}</div>
   <div class="minil">${f.daily.map(([d])=>`<span>${+d.slice(8)}</span>`).join("")}</div>
   <div class="cat" style="margin-top:6px">Son olaylar</div>
-  <div>${f.events.map(e=>`<div class="ev"><span class="tm">${trDate(e.first)}<br>${trTime(e.first)}</span><div><span class="ty">${catLabel(e.cat)} · ${e.n} kaynak</span><div class="pl">${esc(e.title)}</div>${e.summary?`<p>${esc(e.summary.slice(0,220))}${e.summary.length>220?"…":""}</p>`:""}${mediaBlock(e)}<a href="${esc(safeUrl(e.sources[0]?.url))}" target="_blank" rel="noopener">${esc(e.sources[0]?.name||"Kaynak")} ↗</a>${e.n>1?` · <a href="#" class="story" data-id="${esc(e.id)}" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--accent)">tüm kaynaklar</a>`:""}</div></div>`).join("")||'<p class="sub">Kayıt yok.</p>'}</div>`;
+  <div>${(()=>{let day="";return f.events.map(e=>{const d=trDate(e.first);const head=d!==day?`<div class="dayh">${d}</div>`:"";day=d;
+    return head+`<div class="ev"><span class="tm">${trTime(e.first)}</span><div><span class="ty">${catLabel(e.cat)} · ${e.n} kaynak</span><div class="pl">${esc(e.title)}</div>${e.summary?`<p>${esc(e.summary.slice(0,220))}${e.summary.length>220?"…":""}</p>`:""}${mediaBlock(e)}<a href="#" class="story" data-id="${esc(e.id)}" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--accent)">Haberin özü ve kaynaklar →</a></div></div>`;}).join("");})()||'<p class="sub">Kayıt yok.</p>'}</div>`;
   $("sheet").classList.add("on");$("cls").focus();
 }
 $("fronts").addEventListener("click",e=>{const b=e.target.closest(".front");if(b)openFront(+b.dataset.f);});
