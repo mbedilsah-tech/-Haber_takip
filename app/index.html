@@ -161,6 +161,8 @@ a.media b,a.media span{position:relative;color:#fff}
 .badge{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
 .state{padding:40px 10px;text-align:center;color:var(--muted)}
 .srcs a .st{display:flex;gap:6px;align-items:center}
+.pts{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:15px;line-height:1.5}
+.pts li::marker{color:var(--accent)}
 .more-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px;cursor:pointer;font-weight:500}
 </style>
 </head>
@@ -258,7 +260,7 @@ function storyCard(s,opts={}){
   const img=s.img?esc(safeUrl(s.img)):"";
   const head=`<span class="cat">${catLabel(s.cat)}${s.fronts&&s.fronts.length?" · "+esc(s.fronts[0]):""}</span><h4>${esc(s.title)}</h4>`;
   const sum=s.summary?`<p>${esc(s.summary)}</p>`:"";
-  const meta=`<div class="meta">${tags(s)}<span>${s.n} kaynak</span><span>· ${ago(s.last)}</span>${s.media==="video"?'<span>· ▶ video</span>':""}</div>`;
+  const meta=`<div class="meta">${tags(s)}<span>${s.n} kaynak</span><span>· ${ago(s.first)}</span>${s.media==="video"?'<span>· ▶ video</span>':""}</div>`;
   if(opts.big&&img) return `<button class="card story" data-id="${esc(s.id)}"><img class="thumb" src="${img}" alt="" loading="lazy" onerror="this.remove()">${head}${sum}${meta}</button>`;
   return `<button class="card story" data-id="${esc(s.id)}"><div class="row${img?"":" noimg"}"><div class="txt">${head}${sum}</div>${img?`<img class="sq" src="${img}" alt="" loading="lazy" onerror="this.parentNode.classList.add('noimg');this.remove()">`:""}</div>${meta}</button>`;
 }
@@ -268,7 +270,10 @@ function mediaBlock(s){
   return `<a class="media" href="${u}" target="_blank" rel="noopener">${s.img?`<img src="${esc(safeUrl(s.img))}" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${s.media==="video"?"▶ Video":"▣ Fotoğraf"}</b><span>Kaynakta aç ↗</span></a>`;
 }
 function openStory(s){
-  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.last)} ${trTime(s.last)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${s.summary?`<p style="margin:0">${esc(s.summary)}</p>`:""}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
+  const pts=(s.points||[]).filter(Boolean);
+  const body=pts.length?`<div class="cat">Haberin özü</div><ul class="pts">${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`
+    :(s.summary?`<p style="margin:0">${esc(s.summary)}</p>`:'<p class="sub" style="margin:0">Bu haberin metni okunamadı. Ayrıntı için kaynağı aç.</p>');
+  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.first)} ${trTime(s.first)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${body}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
   $("sheet").classList.add("on");$("cls").focus();
 }
 document.addEventListener("click",e=>{const b=e.target.closest(".story");if(b&&STORY_INDEX.has(b.dataset.id))openStory(STORY_INDEX.get(b.dataset.id));});

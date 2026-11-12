@@ -315,6 +315,23 @@ def cluster(items: list[dict]) -> list[dict]:
 
 CAT_ORDER = ["war", "def", "eco", "pol", "geo"]
 
+# Merak tuzağı (clickbait) kalıpları: bu başlıklar kümede başka seçenek varsa kullanılmaz
+BAIT = re.compile(r"\?\s*$|\.\.\.|…|!|\bişte\b|\bbakın\b|\bflaş\b|\bbomba\b|\bşok\b|\bo isim\b|belli oldu|neler oluyor|"
+                  r"dikkat çek|gündem oldu|olay yarat|sosyal medya|canlı (anlatım|blog|yayın)|\bnedir\b|\bkimdir\b|"
+                  r"ne zaman|\bnasıl\b|son durum|merak edil|duyurdu$|açıkladı$|resmen$")
+PREFIX = re.compile(r"^\s*(son dak[iı]ka|canli|canlı|v[iı]deo|flaş|güncelleme|özel haber|breaking|live|watch)\s*[:|\-–—!]+\s*", re.I)
+
+
+def clean_title(t: str) -> str:
+    t = PREFIX.sub("", t).strip()
+    t = re.sub(r"\s+[|–—-]\s+[^|–—-]{2,30}$", "", t) if t.count(" ") > 6 else t  # sondaki "| Site adı"
+    return t[:1].upper() + t[1:]
+
+
+def title_score(i: dict) -> tuple:
+    t = clean_title(i["title"])
+    return (not BAIT.search(trlower(t)), i["official"], bool(re.search(r"\d", t)), min(len(t), 110))
+
 
 def finish(c: dict) -> dict:
     its = c["items"]
@@ -337,9 +354,10 @@ def finish(c: dict) -> dict:
     if not media:
         media = next(((None, i["media"], i["url"]) for i in its if i.get("media")), None)
     n = len(srcs)
+    best_title = clean_title(max(its, key=title_score)["title"])
     urls = [i["url"] for i in sorted(its, key=lambda i: (i["via"] == "Google Haberler", i["kind"] == "telegram")) if i["url"]]
     return {"_urls": urls[:6],
-        "id": rep["id"], "title": rep["title"], "summary": rep["desc"][:420] if rep["desc"] != rep["title"] else "",
+        "id": rep["id"], "title": best_title, "summary": rep["desc"][:420] if rep["desc"] != rep["title"] else "", "points": [],
         "cat": cat, "fronts": [f for f, _ in fronts.most_common(2)], "n": n,
         "first": times[0], "last": times[-1], "sources": srcs[:10],
         "official": any(s["official"] for s in srcs),
@@ -404,6 +422,53 @@ def trim_summary(text: str, title: str, limit: int = 320) -> str:
     return cut[:end + 1] if end > 120 else cut.rsplit(" ", 1)[0] + "…"
 
 
+JUNK = re.compile(r"çerez|cookie|abone ol|tıklay|bülten|google news|takip ed|whatsapp|telegram|copyright|tüm hakları|reklam|"
+                  r"yorum yap|editör|fotoğraf:|kaynak:|haberin devamı|ilgili haber|subscribe|sign up|newsletter|read more|"
+                  r"advertis|follow us|all rights|paylaş|uygulamayı indir|üye ol|giriş yap", re.I)
+SENT_SPLIT = re.compile(r'(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ"“‘(0-9])')
+MAX_POINTS, MAX_POINT_CHARS = 4, 650
+
+
+def key_points(soup, title: str) -> list[str]:
+    """Haber gövdesinden olayı anlatan en fazla 4 cümleyi seçer (yeniden yazmaz, seçer)."""
+    body = soup.find(attrs={"itemprop": "articleBody"}) or soup.find("article") or soup.find("main") or soup
+    paras = []
+    for p in body.find_all("p"):
+        if p.find_parent(["aside", "footer", "nav", "figcaption", "header", "form"]):
+            continue
+        t = re.sub(r"\s+", " ", p.get_text(" ", strip=True))
+        if len(t) < 70 or JUNK.search(t):
+            continue
+        paras.append(t)
+        if len(paras) >= 14:
+            break
+    sents = [x.strip() for t in paras for x in SENT_SPLIT.split(t)]
+    sents = [x for x in sents if 50 <= len(x) <= 280 and not x.endswith("?")]
+    if not sents:
+        return []
+    sigs = [stems(x) for x in sents]
+    freq = Counter(st for sg in sigs for st in sg)
+    tst = stems(title)
+    scored = []
+    for idx, (x, sg) in enumerate(zip(sents, sigs)):
+        if len(sg) < 4:
+            continue
+        sc = sum(freq[w] for w in sg) / len(sg) ** 0.5 + 2 * len(sg & tst)
+        sc += 2.0 * bool(re.search(r"\d", x)) + 1.0 * bool(re.search(r'["“”]', x)) + max(0.0, 4 - idx * 0.5)
+        scored.append((sc, idx))
+    picked, used = [], 0
+    for sc, idx in sorted(scored, reverse=True):
+        if any(len(sigs[idx] & sigs[j]) / len(sigs[idx] | sigs[j]) > 0.5 for j in picked):
+            continue  # aynı şeyi söyleyen cümleyi alma
+        if used + len(sents[idx]) > MAX_POINT_CHARS:
+            continue
+        picked.append(idx)
+        used += len(sents[idx])
+        if len(picked) >= MAX_POINTS:
+            break
+    return [sents[i] for i in sorted(picked)]
+
+
 def page_meta(url: str) -> dict:
     r = requests.get(url, headers={**UA, "User-Agent": "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36"},
                      timeout=12, stream=True)
@@ -429,7 +494,7 @@ def page_meta(url: str) -> dict:
     img = meta("og:image", "og:image:url", "twitter:image", "twitter:image:src")
     if img:
         img = urllib.parse.urljoin(r.url, img)
-    return {"desc": desc, "img": img, "final": r.url}
+    return {"desc": desc, "img": img, "final": r.url, "pts": key_points(soup, meta("og:title") or "")}
 
 
 def enrich_one(url: str) -> dict:
@@ -437,16 +502,21 @@ def enrich_one(url: str) -> dict:
     if not real:
         return {"fail": "decode"}
     m = page_meta(real)
-    return {"desc": m["desc"], "img": m["img"], "final": m["final"]}
+    return {"desc": m["desc"], "img": m["img"], "final": m["final"], "pts": m["pts"]}
 
 
 def enrich(clusters: list[dict]) -> None:
-    need = [c for c in clusters if len(c["summary"]) < 60 or not c["img"]]
+    need = clusters
     todo: list[str] = []
-    for c in need:
+    stale = lambda u: u not in ENRICH or ("fail" not in ENRICH[u] and "pts" not in ENRICH[u])
+    for c in need:  # önce ilk adres; o başarısızsa ikinci
         for u in c["_urls"][:2]:
-            if u not in ENRICH and u not in todo and len(todo) < ENRICH_BUDGET:
-                todo.append(u)
+            if stale(u):
+                if u not in todo and len(todo) < ENRICH_BUDGET:
+                    todo.append(u)
+                break
+            if "fail" not in ENRICH[u]:
+                break
     def work(u):
         try:
             return u, enrich_one(u)
@@ -468,9 +538,14 @@ def enrich(clusters: list[dict]) -> None:
                     c["summary"] = summ
             if not c["img"] and r.get("img") and not r["img"].endswith((".svg", ".gif")):
                 c["img"], c["media"], c["media_url"] = r["img"], c["media"] or "foto", r.get("final") or u
-            if c["summary"] and c["img"]:
+            if not c["points"] and r.get("pts"):
+                c["points"] = r["pts"]
+            if c["summary"] and c["img"] and c["points"]:
                 break
+        if len(c["summary"]) < 60 and c["points"]:
+            c["summary"] = c["points"][0]
     ENRICH_STATS["with_summary"] = sum(1 for c in clusters if len(c["summary"]) >= 40)
+    ENRICH_STATS["with_points"] = sum(1 for c in clusters if c["points"])
     ENRICH_STATS["with_img"] = sum(1 for c in clusters if c["img"])
     ENRICH_STATS["total"] = len(clusters)
 
@@ -489,8 +564,9 @@ def build_news(clusters: list[dict]) -> dict:
     recent = [c for c in clusters if hours_ago(c["last"]) <= FEED_HOURS]
     recent.sort(key=rank, reverse=True)
     brief = ([c for c in recent if c["n"] >= 2] + [c for c in recent if c["n"] < 2])[:3]
+    feed = sorted(recent[:160], key=lambda c: c["first"], reverse=True)  # en yeni en üstte
     return {"updated": iso(NOW), "brief": [{"id": c["id"], "title": c["title"]} for c in brief],
-            "stories": [public(c) for c in recent[:160]]}
+            "stories": [public(c) for c in feed]}
 
 
 def build_fronts(clusters: list[dict]) -> dict:
@@ -628,7 +704,7 @@ def main() -> int:
     # Kalite özeti: iş akışı kaydında sınıflamayı kontrol etmek için
     print("KATEGORİLER", dict(Counter(s["cat"] for s in news["stories"])))
     for s in news["stories"][:60]:
-        print(f'  [{s["cat"]}] n={s["n"]} {",".join(s["fronts"][:1]):<14} {s["title"][:100]}')
+        print(f'  [{s["cat"]}] n={s["n"]} öz={len(s["points"])} {s["first"][5:16]} {s["title"][:95]}')
     return 0
 
 
