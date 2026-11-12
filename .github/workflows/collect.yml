@@ -2,7 +2,7 @@ name: Haberleri topla ve yayınla
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # her 30 dakikada bir (GitHub yoğunken birkaç dakika gecikebilir)
+    - cron: "*/10 * * * *"   # her 10 dakikada bir (GitHub yoğunken gecikebilir)
   workflow_dispatch:          # Actions sekmesinden elle çalıştırma
   push:
     branches: [main]

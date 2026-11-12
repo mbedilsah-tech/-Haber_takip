@@ -163,6 +163,10 @@ a.media b,a.media span{position:relative;color:#fff}
 .srcs a .st{display:flex;gap:6px;align-items:center}
 .pts{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:15px;line-height:1.5}
 .pts li::marker{color:var(--accent)}
+.rf{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg);display:grid;place-items:center;cursor:pointer;flex:0 0 auto}
+.rf svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.rf.busy svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .more-btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:10px;cursor:pointer;font-weight:500}
 </style>
 </head>
@@ -170,7 +174,7 @@ a.media b,a.media span{position:relative;color:#fff}
 <div class="app">
   <div class="top">
     <div class="brand">Haber<span>·</span>Takip</div>
-    <div class="upd">Son güncelleme<br><span id="upd">—</span></div>
+    <div style="display:flex;align-items:center;gap:10px"><div class="upd">Son güncelleme<br><span id="upd">—</span></div><button id="refresh" class="rf" aria-label="Haberleri yenile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button></div>
   </div>
   <main id="main">
     <section class="view on" id="v-feed" aria-label="Akış">
@@ -437,7 +441,7 @@ $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)sh
 window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(VIEWS.includes(v))show(v);});
 window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
 
-async function getJSON(name){try{const r=await fetch(DATA_BASE+name+"?t="+Math.floor(Date.now()/60000),{cache:"no-store"});if(!r.ok)throw 0;return await r.json();}catch(e){return null;}}
+async function getJSON(name){try{const r=await fetch(DATA_BASE+name+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return await r.json();}catch(e){return null;}}
 async function load(){
   const [news,markets,fronts,rte,manual,meta]=await Promise.all(["news.json","markets.json","fronts.json","rte.json","manual.json","meta.json"].map(getJSON));
   D={news,markets,fronts,rte,manual,meta};
@@ -446,7 +450,9 @@ async function load(){
   const h=location.hash.slice(1);show(VIEWS.includes(h)?h:"feed");
 }
 load();
-setInterval(load,10*60*1000);
+setInterval(load,5*60*1000);
+$("refresh").addEventListener("click",async()=>{const b=$("refresh");if(b.classList.contains("busy"))return;b.classList.add("busy");const keep=location.hash;const t0=Date.now();await load();if(keep)try{history.replaceState(null,"",keep);}catch(e){}await new Promise(r=>setTimeout(r,Math.max(0,600-(Date.now()-t0))));b.classList.remove("busy");});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)load();});
 </script>
 </body>
 </html>
