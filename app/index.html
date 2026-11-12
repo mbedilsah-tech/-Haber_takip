@@ -279,11 +279,11 @@ function openStory(s){
   const body=pts.length?`<div class="cat">Haberin özü</div><ul class="pts">${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`
     :(s.summary?`<p style="margin:0">${esc(s.summary)}</p>`:'<p class="sub" style="margin:0">Bu haberin metni okunamadı. Ayrıntı için kaynağı aç.</p>');
   $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.first)} ${trTime(s.first)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${body}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
-  $("sheet").classList.add("on");$("cls").focus();
+  sheetOpen();
 }
-document.addEventListener("click",e=>{const b=e.target.closest(".story");if(b&&STORY_INDEX.has(b.dataset.id))openStory(STORY_INDEX.get(b.dataset.id));});
-$("sheet").addEventListener("click",e=>{if(e.target.id==="sheet"||e.target.id==="cls")$("sheet").classList.remove("on");});
-document.addEventListener("keydown",e=>{if(e.key==="Escape")$("sheet").classList.remove("on");});
+document.addEventListener("click",e=>{const b=e.target.closest(".story");if(b&&b.tagName==="A")e.preventDefault();if(b&&STORY_INDEX.has(b.dataset.id))openStory(STORY_INDEX.get(b.dataset.id));});
+$("sheet").addEventListener("click",e=>{if(e.target.id==="sheet"||e.target.id==="cls")sheetClose();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")sheetClose();});
 
 /* ---------- AKIŞ ---------- */
 let fcat="all",fshow=30;
@@ -400,7 +400,7 @@ function openFront(i){
   <div class="cat" style="margin-top:6px">Son olaylar</div>
   <div>${(()=>{let day="";return f.events.map(e=>{const d=trDate(e.first);const head=d!==day?`<div class="dayh">${d}</div>`:"";day=d;
     return head+`<div class="ev"><span class="tm">${trTime(e.first)}</span><div><span class="ty">${catLabel(e.cat)} · ${e.n} kaynak</span><div class="pl">${esc(e.title)}</div>${e.summary?`<p>${esc(e.summary.slice(0,220))}${e.summary.length>220?"…":""}</p>`:""}${mediaBlock(e)}<a href="#" class="story" data-id="${esc(e.id)}" style="all:unset;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--accent)">Haberin özü ve kaynaklar →</a></div></div>`;}).join("");})()||'<p class="sub">Kayıt yok.</p>'}</div>`;
-  $("sheet").classList.add("on");$("cls").focus();
+  sheetOpen();
 }
 $("fronts").addEventListener("click",e=>{const b=e.target.closest(".front");if(b)openFront(+b.dataset.f);});
 
@@ -429,19 +429,33 @@ function renderRte(){
 
 /* ---------- GEZİNME & YÜKLEME ---------- */
 const VIEWS=["feed","data","front","def","rte"];
-function show(v){
+let curView="feed";
+function showView(v){   // sadece ekranı çizer, geçmişe dokunmaz
+  const changed=v!==curView||!document.querySelector(".view.on#v-"+v);curView=v;
   document.querySelectorAll(".view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
   document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===v));
-  $("main").scrollTop=0;
+  if(changed)$("main").scrollTop=0;
   if(v==="data"){renderKpis();renderChart();renderMexp();}
   if(v==="front")renderFronts();
   if(v==="def")renderDef();
   if(v==="rte")renderRte();
-  try{history.replaceState(null,"","#"+v);}catch(e){}
 }
-$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)show(b.dataset.v);});
-window.addEventListener("hashchange",()=>{const v=location.hash.slice(1);if(VIEWS.includes(v))show(v);});
+/* Geri tuşu: açık pencere → kapanır; başka sekme → Akış; Akış → uygulamadan çıkar.
+   Geçmiş en fazla 3 basamak: [Akış] → [sekme] → [pencere] */
+function go(v){
+  if(v===curView)return;
+  try{
+    if(v==="feed"){history.back();return;}
+    if(curView==="feed")history.pushState({v},"","#"+v);else history.replaceState({v},"","#"+v);
+  }catch(e){}
+  showView(v);
+}
+function sheetOpen(){$("sheet").classList.add("on");try{if(!(history.state&&history.state.sheet))history.pushState({v:curView,sheet:1},"");}catch(e){}const c=$("cls");if(c)c.focus();}
+function sheetClose(){if(!$("sheet").classList.contains("on"))return;if(history.state&&history.state.sheet){history.back();}else $("sheet").classList.remove("on");}
+window.addEventListener("popstate",e=>{$("sheet").classList.remove("on");showView((e.state&&VIEWS.includes(e.state.v))?e.state.v:"feed");});
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.v);});
 window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
+(function initHistory(){const h=location.hash.slice(1);try{history.replaceState({v:"feed"},"","#feed");if(VIEWS.includes(h)&&h!=="feed"){history.pushState({v:h},"","#"+h);curView=h;}}catch(e){}})();
 
 async function getJSON(name){try{const r=await fetch(DATA_BASE+name+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return await r.json();}catch(e){return null;}}
 async function load(){
@@ -449,11 +463,11 @@ async function load(){
   D={news,markets,fronts,rte,manual,meta};
   if(meta){const ok=Object.values(meta.sources||{}).filter(n=>n>0).length;$("upd").textContent=`${trTime(meta.updated)} · ${ok} kaynak`;}
   renderFeed();renderManual();
-  const h=location.hash.slice(1);show(VIEWS.includes(h)?h:"feed");
+  showView(curView);
 }
 load();
 setInterval(load,5*60*1000);
-$("refresh").addEventListener("click",async()=>{const b=$("refresh");if(b.classList.contains("busy"))return;b.classList.add("busy");const keep=location.hash;const t0=Date.now();await load();if(keep)try{history.replaceState(null,"",keep);}catch(e){}await new Promise(r=>setTimeout(r,Math.max(0,600-(Date.now()-t0))));b.classList.remove("busy");});
+$("refresh").addEventListener("click",async()=>{const b=$("refresh");if(b.classList.contains("busy"))return;b.classList.add("busy");const t0=Date.now();await load();await new Promise(r=>setTimeout(r,Math.max(0,600-(Date.now()-t0))));b.classList.remove("busy");});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)load();});
 </script>
 </body>
