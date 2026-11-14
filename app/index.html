@@ -455,6 +455,9 @@ function sheetClose(){if(!$("sheet").classList.contains("on"))return;if(history.
 window.addEventListener("popstate",e=>{$("sheet").classList.remove("on");showView((e.state&&VIEWS.includes(e.state.v))?e.state.v:"feed");});
 $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.v);});
 window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
+/* Android'in geri tuşu (APK): Capacitor App eklentisi üzerinden gelir */
+(function nativeBack(){const A=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.App;if(!A||!A.addListener)return;
+  A.addListener("backButton",()=>{if($("sheet").classList.contains("on"))sheetClose();else if(curView!=="feed")go("feed");else A.exitApp();});})();
 (function initHistory(){const h=location.hash.slice(1);try{history.replaceState({v:"feed"},"","#feed");if(VIEWS.includes(h)&&h!=="feed"){history.pushState({v:h},"","#"+h);curView=h;}}catch(e){}})();
 
 async function getJSON(name){try{const r=await fetch(DATA_BASE+name+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw 0;return await r.json();}catch(e){return null;}}
