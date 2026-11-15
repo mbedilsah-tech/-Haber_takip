@@ -278,8 +278,11 @@ function openStory(s){
   const pts=(s.points||[]).filter(Boolean);
   const body=pts.length?`<div class="cat">Haberin özü</div><ul class="pts">${pts.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`
     :(s.summary?`<p style="margin:0">${esc(s.summary)}</p>`:'<p class="sub" style="margin:0">Bu haberin metni okunamadı. Ayrıntı için kaynağı aç.</p>');
-  $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.first)} ${trTime(s.first)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${body}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
-  sheetOpen();
+  const nested=$("sheet").classList.contains("on")&&sheetFront!==null&&!(history.state&&history.state.sheet===2);
+  if(nested){sheetScroll=$("sheetin").scrollTop;try{history.pushState({v:curView,sheet:2},"");}catch(e){}}
+  const inFront=sheetFront!==null;
+  $("sheetin").innerHTML=`<button class="close" id="cls" ${inFront?'style="align-self:flex-start"':""}>${inFront?"← Listeye dön":"Kapat"}</button><span class="cat">${catLabel(s.cat)} · ${trDate(s.first)} ${trTime(s.first)}</span><h3 id="sh-t">${esc(s.title)}</h3><div class="meta">${tags(s)}<span>${s.n} kaynak bu olayı aktardı</span></div>${mediaBlock(s)}${body}<div class="cat">Kaynaklar</div><div class="srcs">${s.sources.map(x=>`<a href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><span class="st" style="color:var(--ink);font-family:var(--body);font-size:14px">${esc(x.name)}${x.official?' <span class="tag o">Resmî</span>':""}</span><span>${trTime(x.ts)} ↗</span></a>`).join("")}</div>`;
+  sheetOpen();$("sheetin").scrollTop=0;
 }
 document.addEventListener("click",e=>{const b=e.target.closest(".story");if(b&&b.tagName==="A")e.preventDefault();if(b&&STORY_INDEX.has(b.dataset.id))openStory(STORY_INDEX.get(b.dataset.id));});
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet"||e.target.id==="cls")sheetClose();});
@@ -390,7 +393,9 @@ function renderFronts(){
   $("fronts").innerHTML=F.fronts.map((f,i)=>{const d=f.count-f.prev,pc=f.prev?Math.round(d/f.prev*100):null;const last=f.events[0];
     return `<button class="card front" data-f="${i}"><span class="n">${esc(f.name)}</span><span class="c">${f.count} olay ${pc===null?"":`<span class="${d>0?"down":"up"}">${d>0?"▲":"▼"}%${Math.abs(pc)}</span>`}</span><div class="bar" role="img" aria-label="${f.count} olay"><i style="width:${(f.count/fmax*100).toFixed(1)}%"></i></div><span class="last">${last?`<b style="color:var(--accent);font-family:var(--mono);font-size:12px">${ago(last.first)}</b> · ${esc(last.title)}`:"Son 7 günde kayıt yok."}</span>${f.events.length?'<span class="more">Olayları gör →</span>':""}</button>`;}).join("");
 }
+let sheetFront=null,sheetScroll=0;
 function openFront(i){
+  sheetFront=i;
   const f=D.fronts.fronts[i],mx=Math.max(1,...f.daily.map(d=>d[1]));
   f.events.forEach(s=>STORY_INDEX.set(s.id,s));
   $("sheetin").innerHTML=`<button class="close" id="cls">Kapat</button><span class="cat">Cephe · son 7 gün</span><h3 id="sh-t">${esc(f.name)}</h3>
@@ -451,8 +456,10 @@ function go(v){
   showView(v);
 }
 function sheetOpen(){$("sheet").classList.add("on");try{if(!(history.state&&history.state.sheet))history.pushState({v:curView,sheet:1},"");}catch(e){}const c=$("cls");if(c)c.focus();}
-function sheetClose(){if(!$("sheet").classList.contains("on"))return;if(history.state&&history.state.sheet){history.back();}else $("sheet").classList.remove("on");}
-window.addEventListener("popstate",e=>{$("sheet").classList.remove("on");showView((e.state&&VIEWS.includes(e.state.v))?e.state.v:"feed");});
+function sheetClose(){if(!$("sheet").classList.contains("on"))return;if(history.state&&history.state.sheet){history.back();}else{sheetFront=null;$("sheet").classList.remove("on");}}
+window.addEventListener("popstate",e=>{
+  if(e.state&&e.state.sheet===1&&sheetFront!==null&&D.fronts){const y=sheetScroll;openFront(sheetFront);$("sheetin").scrollTop=y;return;}  // haberden cephe listesine dön
+  sheetFront=null;$("sheet").classList.remove("on");showView((e.state&&VIEWS.includes(e.state.v))?e.state.v:"feed");});
 $("nav").addEventListener("click",e=>{const b=e.target.closest("button");if(b)go(b.dataset.v);});
 window.addEventListener("resize",()=>{if($("v-data").classList.contains("on")){renderChart();renderMexp();}if($("v-def").classList.contains("on"))renderExp();});
 /* Android'in geri tuşu (APK): Capacitor App eklentisi üzerinden gelir */
